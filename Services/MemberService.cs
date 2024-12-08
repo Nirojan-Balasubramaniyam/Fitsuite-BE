@@ -104,6 +104,7 @@ namespace GYMFeeManagement_System_BE.Services
             if (!DateTime.TryParse(addMemberReq.DoB.ToString(), out DateTime dob))
             {
                 throw new ArgumentException("Invalid date format for Date of Birth");
+
             }
 
           
