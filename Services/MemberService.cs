@@ -16,19 +16,23 @@ namespace GYMFeeManagement_System_BE.Services
     public class MemberService : IMemberService
     {
         private readonly IMemberRepository _memberRepository;
+        private readonly ITrainingProgramRepository _trainingProgramRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IConfiguration _configuration;
 
-        public MemberService(IMemberRepository memberRepository, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+        public MemberService(IMemberRepository memberRepository, ITrainingProgramRepository trainingProgramRepository, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _memberRepository = memberRepository;
+            _trainingProgramRepository = trainingProgramRepository;
             _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
         }
 
-        public async Task<PaginatedResponse<MemberResDTO>> GetAllMembers(int pageNumber, int pageSize)
+        public async Task<PaginatedResponse<MemberResDTO>> GetAllMembers(int pageNumber, int pageSize, bool? isActive, int branchId = 0)
         {
-            var memberList = await _memberRepository.GetAllMembers(pageNumber, pageSize);
+            var memberList = await _memberRepository.GetAllMembers(pageNumber, pageSize, isActive, branchId);
+
+            var allPrograms = await _trainingProgramRepository.GetAllPrograms();
 
             var memberResDTOList = memberList.Data.Select(member => new MemberResDTO
             {
@@ -47,15 +51,19 @@ namespace GYMFeeManagement_System_BE.Services
                 BranchId = member.BranchId,
                 Address = member.Address != null ? new AddressResDTO
                 {
-                  AddressId = member.Address.AddressId,
-                  Street = member.Address.Street,
-                  City = member.Address.City,
-                  District = member.Address.District,
-                  Province = member.Address.Province,
-                  Country = member.Address.Country
+                    AddressId = member.Address.AddressId,
+                    Street = member.Address.Street,
+                    City = member.Address.City,
+                    District = member.Address.District,
+                    Province = member.Address.Province,
+                    Country = member.Address.Country
                 } : null,
-                IsActive = member.IsActive
-            }).ToList();
+                IsActive = member.IsActive,
+                // Calculate total training cost for the member from EnrollPrograms and their TrainingProgram's cost
+                MonthlyPayment = member.EnrollPrograms?.Sum(ep =>
+                        allPrograms.FirstOrDefault(p => p.ProgramId == ep.ProgramId)?.Cost ?? 0) ?? 0
+
+                 }).ToList();
 
             return new PaginatedResponse<MemberResDTO>
             {
@@ -69,6 +77,9 @@ namespace GYMFeeManagement_System_BE.Services
         public async Task<MemberResDTO> GetMemberById(int memberId)
         {
             var member = await _memberRepository.GetMemberById(memberId);
+
+            var allPrograms = await _trainingProgramRepository.GetAllPrograms();
+
 
             var memberRes = new MemberResDTO
             {
@@ -93,7 +104,10 @@ namespace GYMFeeManagement_System_BE.Services
                     Province = member.Address.Province,
                     Country = member.Address.Country
                 } : null,
-                IsActive = member.IsActive
+                IsActive = member.IsActive,
+                // Calculate total training cost for the member from EnrollPrograms and their TrainingProgram's cost
+                MonthlyPayment = member.EnrollPrograms?.Sum(ep =>
+                        allPrograms.FirstOrDefault(p => p.ProgramId == ep.ProgramId)?.Cost ?? 0) ?? 0
             };
 
             return memberRes;
@@ -106,8 +120,6 @@ namespace GYMFeeManagement_System_BE.Services
                 throw new ArgumentException("Invalid date format for Date of Birth");
 
             }
-
-          
 
             // Validate the email format and uniqueness
             await ValidateEmail(addMemberReq.Email);
@@ -134,7 +146,7 @@ namespace GYMFeeManagement_System_BE.Services
                     Province = addMemberReq.Address.Province,
                     Country = addMemberReq.Address.Country,
                 },
-                IsActive =true
+                IsActive = true
             };
 
             if (addMemberReq.ImageFile != null)
@@ -142,11 +154,11 @@ namespace GYMFeeManagement_System_BE.Services
                 member.ImagePath = await SaveImageFileAsync(addMemberReq.ImageFile);
             }
 
-            var addedMember =  await _memberRepository.AddMember(member);
+            var addedMember = await _memberRepository.AddMember(member);
 
-            var token =  CreateToken(addedMember);
+            var token = CreateToken(addedMember);
             return token;
-           
+
         }
 
 
@@ -198,8 +210,8 @@ namespace GYMFeeManagement_System_BE.Services
                 existingMember.Address.Country = updateMemberReq.Address.Country;
             }
 
-            var updatedMember =  await _memberRepository.UpdateMember(existingMember);
-           
+            var updatedMember = await _memberRepository.UpdateMember(existingMember);
+
 
             var updatedMemberRes = new MemberResDTO
             {
@@ -291,7 +303,7 @@ namespace GYMFeeManagement_System_BE.Services
 
 
 
-        private  string CreateToken(Member member)
+        private string CreateToken(Member member)
         {
             var claimList = new List<Claim>();
             claimList.Add(new Claim("MemberId", member.MemberId.ToString()));

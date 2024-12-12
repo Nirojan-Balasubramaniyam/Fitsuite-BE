@@ -7,6 +7,7 @@ namespace GYMFeeManagement_System_BE.DTOs.Request
         public int? TypeId { get; set; }
         public string ProgramName { get; set; }
         public decimal? Cost { get; set; }
+        public string Description { get; set; }
         public IFormFile? ImageFile { get; set; }
     }
 }

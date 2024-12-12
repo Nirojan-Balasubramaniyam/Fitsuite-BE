@@ -24,7 +24,7 @@ namespace GYMFeeManagement_System_BE.Repositories
 
         public async Task<ICollection<TrainingProgram>> GetAllPrograms()
         {
-            var trainingProgramList = await _dbContext.TrainingPrograms.ToListAsync();
+            var trainingProgramList = await _dbContext.TrainingPrograms.Include(tp => tp.ProgramType).ToListAsync();
             if (trainingProgramList.Count == 0)
             {
                 throw new Exception("TrainingPrograms not Found");

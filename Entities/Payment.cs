@@ -7,7 +7,7 @@ namespace GYMFeeManagement_System_BE.Entities
         [Key]
         public int PaymentId { get; set; }
         public int MemberId { get; set; }
-        public Member member { get; set; }
+        public Member Member { get; set; }
         public string PaymentType { get; set; }
         public decimal Amount { get; set; }
         public string PaymentMethod { get; set; }

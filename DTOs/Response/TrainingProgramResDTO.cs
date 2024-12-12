@@ -7,6 +7,8 @@ namespace GYMFeeManagement_System_BE.DTOs.Response
         public int ProgramId { get; set; }
         public int TypeId { get; set; }
         public string ProgramName { get; set; }
+        public string TypeName { get; set; }
+
         public decimal Cost { get; set; }
         public string Description { get; set; }
         public string? ImagePath { get; set; }

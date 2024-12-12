@@ -65,11 +65,11 @@ namespace GYMFeeManagement_System_BE.Controllers
         }
 
         [HttpGet("alert-type{alertType}")]
-        public async Task<IActionResult> GetAlertsByAlertType(string alertType)
+        public async Task<IActionResult> GetAlertsByAlertType(string alertType, int? branchId = null)
         {
             try
             {
-                var data = await _alertService.GetAlertsByAlertType(alertType);
+                var data = await _alertService.GetAlertsByAlertType(alertType, branchId);
                 return Ok(data);
 
             }

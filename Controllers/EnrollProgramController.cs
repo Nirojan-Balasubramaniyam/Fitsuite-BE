@@ -48,7 +48,7 @@ namespace GYMFeeManagement_System_BE.Controllers
 
         }
 
-        [HttpGet("/training-programs{memberId}")]
+        [HttpGet("/training-programs/{memberId}")]
         public async Task<IActionResult> GetTrainingProgramsByMemberId(int memberId)
         {
             try

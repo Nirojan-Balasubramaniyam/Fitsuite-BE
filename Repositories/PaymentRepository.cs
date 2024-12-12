@@ -22,6 +22,11 @@ namespace GYMFeeManagement_System_BE.Repositories
             return payment;
         }
 
+        public async Task<List<Payment>> GetAllPayments()
+        {
+            return await _dbContext.Payments.ToListAsync(); 
+        }
+
 
         public async Task<PaginatedResponse<Payment>> GetAllPayments(string? paymentType, int? pageNumber, int? pageSize)
         {
@@ -70,6 +75,29 @@ namespace GYMFeeManagement_System_BE.Repositories
             return response;
         }
 
+        public async Task<ICollection<Payment>> GetAllPaymentsByBranchId(int? branchId)
+        {
+            var query = _dbContext.Payments.AsQueryable(); // Start with a queryable
+
+            // If a branchId is provided, filter by that branchId
+            if (branchId.HasValue)
+            {
+                query = query.Where(p => p.Member.BranchId == branchId.Value);
+            }
+
+            // Include Member data
+            query = query.Include(p => p.Member);
+
+            // Execute the query and return the result as a list of Payment entities
+            var payments = await query.ToListAsync();
+
+            return payments;
+        }
+
+
+
+
+
 
 
         public async Task<Payment> GetPaymentById(int paymentId)
@@ -77,6 +105,13 @@ namespace GYMFeeManagement_System_BE.Repositories
             var payment = await _dbContext.Payments.FirstOrDefaultAsync(w => w.PaymentId == paymentId);
             if (payment == null) throw new Exception("Payment Not Found");
             return payment;
+        }
+
+        public async Task<List<Payment>> GetPaymentsByMemberId(int memberId)
+        {
+            return await _dbContext.Payments
+                .Where(payment => payment.MemberId == memberId) // Filter by member ID
+                .ToListAsync();
         }
 
         public async Task<Payment> UpdatePayment(Payment updatePayment)

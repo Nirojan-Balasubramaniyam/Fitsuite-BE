@@ -8,6 +8,7 @@ namespace GYMFeeManagement_System_BE.IServices
     {
         Task<PaginatedResponse<TrainingProgramResDTO>> GetAllTrainingPrograms(int pageNumber, int pageSize);
         Task<TrainingProgramResDTO> GetTrainingProgramById(int trainingProgramId);
+        Task<ICollection<TrainingProgramResDTO>> GetAllTrainingPrograms();
         Task<TrainingProgramResDTO> AddTrainingProgram(TrainingProgramReqDTO addTrainingProgramReq);
         Task<TrainingProgramResDTO> UpdateTrainingProgram(int trainingProgramId, TrainingProgramReqDTO updateTrainingProgramReq);
         Task DeleteTrainingProgram(int trainingProgramId);

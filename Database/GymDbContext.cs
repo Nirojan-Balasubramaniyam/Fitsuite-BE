@@ -60,7 +60,7 @@ namespace GYMFeeManagement_System_BE.Database
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Payment>()
-                .HasOne(p => p.member)
+                .HasOne(p => p.Member)
                 .WithMany(m => m.Payments)
                 .HasForeignKey(p => p.MemberId)
                 .OnDelete(DeleteBehavior.Cascade);

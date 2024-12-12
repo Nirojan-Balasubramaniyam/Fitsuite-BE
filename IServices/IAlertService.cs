@@ -9,7 +9,7 @@ namespace GYMFeeManagement_System_BE.IServices
         Task<List<AlertResDTO>> GetAllAlerts();
         Task<AlertResDTO> GetAlertById(int alertId);
         Task<List<AlertResDTO>> GetAlertsByMemberId(int memberId);
-        Task<List<AlertResDTO>> GetAlertsByAlertType(string alertType);
+        Task<List<AlertResDTO>> GetAlertsByAlertType(string alertType, int? branchId = null);
         Task<AlertResDTO> AddAlert(AlertReqDTO addAlertReq);
         Task<AlertResDTO> UpdateAlert(int alertId, AlertReqDTO updateAlertReq);
         Task DeleteAlert(int alertId);

@@ -87,9 +87,15 @@ namespace GYMFeeManagement_System_BE
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
 
-            /*request*/
+            /*contactus*/
             builder.Services.AddScoped<IContactUsMessageRepository, ContactUsMessageRepository>();
             builder.Services.AddScoped<IContactUsMessageService, ContactUsMessageService>();
+
+            /*reports*/
+            builder.Services.AddScoped<IReportService, ReportService>();
+
+            /*dashboard*/
+            builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 
 

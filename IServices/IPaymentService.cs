@@ -8,6 +8,9 @@ namespace GYMFeeManagement_System_BE.IServices
     {
         Task<PaginatedResponse<PaymentResDTO>> GetAllPayments(string? paymentType, int? pageNumber, int? pageSize);
         Task<PaymentResDTO> GetPaymentById(int trainingPaymentId);
+        Task<List<PaymentResDTO>> GetAllPayments();
+        Task<ICollection<PaymentResDTO>> GetAllPaymentsByBranchId(int? branchId);
+        Task<PaymentResDTO> GetLastRenewalPaymentForMember(int memberId);
         Task<PaymentResDTO> AddPayment(PaymentReqDTO addPaymentReq);
         Task<PaymentResDTO> UpdatePayment(int trainingPaymentId, PaymentReqDTO updatePaymentReq);
         Task DeletePayment(int trainingPaymentId);

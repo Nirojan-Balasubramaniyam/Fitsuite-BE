@@ -19,6 +19,24 @@ namespace GYMFeeManagement_System_BE.Services
             _configuration = configuration;
         }
 
+        public async Task<ICollection<TrainingProgramResDTO>> GetAllTrainingPrograms()
+        {
+            var trainingProgramList = await _trainingProgramRepository.GetAllPrograms();
+
+            var trainingProgramResDTOList = trainingProgramList.Select(trainingProgram => new TrainingProgramResDTO
+            {
+                ProgramId = trainingProgram.ProgramId,
+                TypeId = trainingProgram.TypeId,
+                ProgramName = trainingProgram.ProgramName,
+                Cost = trainingProgram.Cost,
+                Description = trainingProgram.Description,
+                ImagePath = trainingProgram.ImagePath,
+                TypeName = trainingProgram.ProgramType?.TypeName
+            }).ToList();
+
+            return trainingProgramResDTOList;            
+        }
+
         public async Task<PaginatedResponse<TrainingProgramResDTO>> GetAllTrainingPrograms(int pageNumber, int pageSize)
         {
             var trainingProgramList = await _trainingProgramRepository.GetAllPrograms( pageNumber, pageSize);
@@ -81,6 +99,7 @@ namespace GYMFeeManagement_System_BE.Services
             {
                 TypeId = (int)addTrainingProgramReq.TypeId,
                 ProgramName = addTrainingProgramReq.ProgramName,
+                Description = addTrainingProgramReq.Description,
                 Cost = (decimal)addTrainingProgramReq.Cost
             };
 

@@ -76,9 +76,9 @@ namespace GYMFeeManagement_System_BE.Services
             return alertResDTOList;
         }
 
-        public async Task<List<AlertResDTO>> GetAlertsByAlertType(string alertType)
+        public async Task<List<AlertResDTO>> GetAlertsByAlertType(string alertType, int? branchId = null)
         {
-            var alerts = await _alertRepository.GetAlertsByAlertType(alertType);
+            var alerts = await _alertRepository.GetAlertsByAlertType(alertType, branchId);
 
             var alertResDTOList = alerts.Select(alert => new AlertResDTO
             {

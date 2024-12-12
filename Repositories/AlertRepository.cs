@@ -27,7 +27,9 @@ namespace GYMFeeManagement_System_BE.Repositories
 
         public async Task<List<Alert>> GetAlertsByMemberId(int memberId)
         {
-            var memberAlerts = await _dbContext.Alerts.Where(a => a.MemberId == memberId).ToListAsync();
+            var memberAlerts = await _dbContext.Alerts
+                .Where(a => a.MemberId == memberId && a.Status == true)
+                .ToListAsync();
             if (memberAlerts == null)
             {
                 throw new Exception("Alerts not Found!");
@@ -36,16 +38,33 @@ namespace GYMFeeManagement_System_BE.Repositories
 
         }
 
-        public async Task<List<Alert>> GetAlertsByAlertType(string alertType)
+        public async Task<List<Alert>> GetAlertsByAlertType(string alertType, int? branchId = null)
         {
-            var memberAlerts = await _dbContext.Alerts.Where(a => a.AlertType == alertType).ToListAsync();
-            if (memberAlerts == null)
-            {
-                throw new Exception($"{alertType} Alerts not Found!");
-            }
-            return memberAlerts;
+            
+            var query = _dbContext.Alerts.AsQueryable();
 
+            
+            query = query.Where(a => a.AlertType.ToLower() == alertType.ToLower() && a.Status == true);
+
+            
+            if (branchId.HasValue)
+            {
+                query = query.Where(a => a.member.BranchId == branchId.Value);
+            }
+
+            query = query.Include(a => a.member);
+
+            var memberAlerts = await query.ToListAsync();
+
+            
+            if (memberAlerts == null || !memberAlerts.Any())
+            {
+                throw new Exception($"{alertType} Alerts not found for the specified branch!");
+            }
+
+            return memberAlerts;
         }
+
 
         public async Task<List<Alert>> GetAllAlerts()
         {

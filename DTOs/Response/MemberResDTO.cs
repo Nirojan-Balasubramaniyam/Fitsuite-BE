@@ -14,6 +14,7 @@ namespace GYMFeeManagement_System_BE.DTOs.Response
         public string Gender { get; set; }
         public string EmergencyContactName { get; set; }
         public string EmergencyContactNumber { get; set; }
+        public decimal MonthlyPayment { get; set; }
         public string? ImagePath { get; set; }
         public int? TrainerId { get; set; }
         public int BranchId { get; set; }

@@ -74,11 +74,11 @@ namespace GYMFeeManagement_System_BE.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllMembers(int pageNumber, int pageSize)
+        public async Task<IActionResult> GetAllMembers(int pageNumber, int pageSize, bool? isActive, int branchId = 0)
         {
             try
             {
-                var data = await _memberService.GetAllMembers(pageNumber, pageSize);
+                var data = await _memberService.GetAllMembers(pageNumber, pageSize, isActive, branchId);
 
                 return Ok(data);
 

@@ -1,4 +1,5 @@
 ﻿using GYMFeeManagement_System_BE.DTOs.Request;
+using GYMFeeManagement_System_BE.Entities;
 using GYMFeeManagement_System_BE.IServices;
 using GYMFeeManagement_System_BE.Services;
 using Microsoft.AspNetCore.Http;
@@ -39,6 +40,54 @@ namespace GYMFeeManagement_System_BE.Controllers
             try
             {
                 var data = await _paymentService.GetPaymentById(paymentId);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        [HttpGet("last-renewal/{memberId}")]
+        public async Task<IActionResult> GetLastRenewalPaymentForMember(int memberId)
+        {
+            try
+            {
+                var data = await _paymentService.GetLastRenewalPaymentForMember(memberId);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        [HttpGet("all-payments")]
+        public async Task<IActionResult> GetAllPayments()
+        {
+            try
+            {
+                var data = await _paymentService.GetAllPayments();
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+        [HttpGet("all-payments/{branchId}")]
+        public async Task<IActionResult> GetAllPayments(int? branchId)
+        {
+            try
+            {
+                var data = await _paymentService.GetAllPaymentsByBranchId(branchId);
                 return Ok(data);
 
             }

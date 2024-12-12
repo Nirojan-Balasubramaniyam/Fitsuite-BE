@@ -32,38 +32,143 @@ namespace GYMFeeManagement_System_BE.Repositories
             return memberList;
         }
 
-        public async Task<PaginatedResponse<Member>> GetAllMembers(int pageNumber, int pageSize)
-        {
-            // Set default values if inputs are invalid
-            pageNumber = pageNumber <= 0 ? 1 : pageNumber;
-            pageSize = pageSize <= 0 ? 10 : pageSize;
-
-            var totalRecords = await _dbContext.Members.CountAsync(); // Total records for pagination
-            if (totalRecords == 0)
+        /*    public async Task<PaginatedResponse<Member>> GetAllMembers(int pageNumber, int pageSize)
             {
-                throw new Exception("Members not Found");
+                // Set default values if inputs are invalid
+                pageNumber = pageNumber <= 0 ? 1 : pageNumber;
+                pageSize = pageSize <= 0 ? 10 : pageSize;
+
+                var totalRecords = await _dbContext.Members.CountAsync(); // Total records for pagination
+                if (totalRecords == 0)
+                {
+                    throw new Exception("Members not Found");
+                }
+
+                var memberList = await _dbContext.Members
+                    .Include(m => m.Address)
+                    .Include(m => m.EnrollPrograms)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var response = new PaginatedResponse<Member>
+                {
+                    TotalRecords = totalRecords,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Data = memberList
+                };
+
+                return response;
+            }*/
+
+        /*  public async Task<PaginatedResponse<Member>> GetAllMembers(int pageNumber, int pageSize, bool? isActive, int branchId = 0)
+          {
+              // Set default values if inputs are invalid
+              pageNumber = pageNumber <= 0 ? 1 : pageNumber;
+              pageSize = pageSize <= 0 ? 10 : pageSize;
+
+              // Filter the members based on the 'isActive' parameter if provided
+              IQueryable<Member> query = _dbContext.Members.Include(m => m.Address).Include(m => m.EnrollPrograms);
+
+              // If isActive is specified, filter based on the status
+              if (isActive.HasValue)
+              {
+                  query = query.Where(m => m.IsActive == isActive.Value);
+              }
+
+              if (branchId != 0)
+              {
+                  query = query.Where(m => m.BranchId == branchId);
+              }
+
+              // Get the total record count after applying the filter
+              var totalRecords = await query.CountAsync();
+
+              if (totalRecords == 0)
+              {
+                  throw new Exception("No members found matching the criteria");
+              }
+
+              // Paginate the filtered results
+              var memberList = await query
+                  .Skip((pageNumber - 1) * pageSize)
+                  .Take(pageSize)
+                  .ToListAsync();
+
+              var response = new PaginatedResponse<Member>
+              {
+                  TotalRecords = totalRecords,
+                  PageNumber = pageNumber,
+                  PageSize = pageSize,
+                  Data = memberList
+              };
+
+              return response;
+          }*/
+
+        public async Task<PaginatedResponse<Member>> GetAllMembers(int pageNumber, int pageSize, bool? isActive, int branchId = 0)
+        {
+            // Filter the members based on the 'isActive' parameter if provided
+            IQueryable<Member> query = _dbContext.Members
+                .Include(m => m.Address)
+                .Include(m => m.EnrollPrograms);
+
+            // If isActive is specified, filter based on the status
+            if (isActive.HasValue)
+            {
+                query = query.Where(m => m.IsActive == isActive.Value);
             }
 
-            var memberList = await _dbContext.Members
-                .Include(m => m.Address)
+            // Filter by branchId if provided
+            if (branchId != 0)
+            {
+                query = query.Where(m => m.BranchId == branchId);
+            }
+
+            // Get the total record count after applying the filter
+            var totalRecords = await query.CountAsync();
+
+            if (totalRecords == 0)
+            {
+                throw new Exception("No members found matching the criteria");
+            }
+
+            // If both pageNumber and pageSize are 0, fetch all members
+            if (pageNumber == 0 && pageSize == 0)
+            {
+                var allMembers = await query.ToListAsync();
+
+                return new PaginatedResponse<Member>
+                {
+                    TotalRecords = totalRecords,
+                    PageNumber = 1, // Default to 1 for clarity
+                    PageSize = totalRecords, // Set to total records
+                    Data = allMembers
+                };
+            }
+
+            // Paginate the filtered results
+            var memberList = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            var response = new PaginatedResponse<Member>
+            return new PaginatedResponse<Member>
             {
                 TotalRecords = totalRecords,
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 Data = memberList
             };
-
-            return response;
         }
+
+
 
         public async Task<Member> GetMemberById(int memberId)
         {
             var member = await _dbContext.Members.Include(m => m.Address)
+                                                .Include(m => m.EnrollPrograms)
                                                 .FirstOrDefaultAsync(m => m.MemberId == memberId);
             if (member == null) throw new Exception("Member Not Found");
             return member;
@@ -100,9 +205,13 @@ namespace GYMFeeManagement_System_BE.Repositories
         {
             var member = await GetMemberById(memberId);
             if (member == null) throw new Exception("Member Not Found");
+            member.IsActive = false;
 
-            _dbContext.Members.Remove(member);
+            _dbContext.Members.Update(member);
             await _dbContext.SaveChangesAsync();
+
+            //_dbContext.Members.Remove(member);
+           // await _dbContext.SaveChangesAsync();
         }
     }
 }

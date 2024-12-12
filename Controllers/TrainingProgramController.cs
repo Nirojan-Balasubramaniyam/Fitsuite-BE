@@ -11,9 +11,9 @@ namespace GYMFeeManagement_System_BE.Controllers
     {
         private readonly ITrainingProgramService _trainingProgramService;
 
-        public TrainingProgramController(ITrainingProgramService staffService)
+        public TrainingProgramController(ITrainingProgramService trainingProgram)
         {
-            _trainingProgramService = staffService;
+            _trainingProgramService = trainingProgram;
         }
 
 
@@ -70,12 +70,28 @@ namespace GYMFeeManagement_System_BE.Controllers
 
         }*/
 
-        [HttpGet]
+        [HttpGet("pagination")]
         public async Task<IActionResult> GetAllTrainingPrograms(int pageNumber, int pageSize)
         {
             try
             {
                 var data = await _trainingProgramService.GetAllTrainingPrograms(pageNumber, pageSize);
+
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllTrainingPrograms()
+        {
+            try
+            {
+                var data = await _trainingProgramService.GetAllTrainingPrograms();
 
                 return Ok(data);
 

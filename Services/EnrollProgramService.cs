@@ -3,16 +3,20 @@ using GYMFeeManagement_System_BE.Entities;
 using GYMFeeManagement_System_BE.IRepositories;
 using GYMFeeManagement_System_BE.IServices;
 using GYMFeeManagement_System_BE.DTOs.Response;
+using GYMFeeManagement_System_BE.Repositories;
 
 namespace GYMFeeManagement_System_BE.Services
 {
     public class EnrollProgramService : IEnrollProgramService
     {
         private readonly IEnrollProgramRepository _enrollProgramRepository;
+        private readonly IProgramTypeRepository _programTypeRepository;
 
-        public EnrollProgramService(IEnrollProgramRepository enrollProgramRepository)
+
+        public EnrollProgramService(IEnrollProgramRepository enrollProgramRepository, IProgramTypeRepository programTypeRepository)
         {
             _enrollProgramRepository = enrollProgramRepository;
+            _programTypeRepository = programTypeRepository;
         }
 
         public async Task<List<EnrollProgramResDTO>> GetAllEnrollPrograms()
@@ -57,23 +61,50 @@ namespace GYMFeeManagement_System_BE.Services
             return enrollProgramResDTOList;
         }
 
+        /* public async Task<List<TrainingProgramResDTO>> GetTrainingProgramsByMemberId(int memberId)
+         {
+             var trainingPrograms = await _enrollProgramRepository.GetTrainingProgramsByMemberId(memberId);
+
+             var trainingProgramResDTOList = trainingPrograms.Select(tp => new TrainingProgramResDTO
+             {
+                 ProgramId = tp.ProgramId,
+                 ProgramName = tp.ProgramName,
+                 TypeId = tp.TypeId,
+                 Cost = tp.Cost,
+                 ImagePath = tp.ImagePath,
+                 Description = tp.Description,
+                 TypeName = await _programTypeRepository.GetProgramTypeById(tp.TypeId).TypeName
+
+             }).ToList();
+
+             return trainingProgramResDTOList;
+         }*/
+
         public async Task<List<TrainingProgramResDTO>> GetTrainingProgramsByMemberId(int memberId)
         {
             var trainingPrograms = await _enrollProgramRepository.GetTrainingProgramsByMemberId(memberId);
 
-            var trainingProgramResDTOList = trainingPrograms.Select(tp => new TrainingProgramResDTO
+            
+            var trainingProgramResDTOList = new List<TrainingProgramResDTO>();
+            foreach (var tp in trainingPrograms)
             {
-                ProgramId = tp.ProgramId,
-                ProgramName = tp.ProgramName,
-                TypeId = tp.TypeId,
-                Cost = tp.Cost,
-                ImagePath = tp.ImagePath,
-                Description = tp.Description
+                var programType = await _programTypeRepository.GetProgramTypeById(tp.TypeId);
 
-            }).ToList();
+                trainingProgramResDTOList.Add(new TrainingProgramResDTO
+                {
+                    ProgramId = tp.ProgramId,
+                    ProgramName = tp.ProgramName,
+                    TypeId = tp.TypeId,
+                    Cost = tp.Cost,
+                    ImagePath = tp.ImagePath,
+                    Description = tp.Description,
+                    TypeName = programType.TypeName
+                });
+            }
 
             return trainingProgramResDTOList;
         }
+
 
         public async Task<EnrollProgramResDTO> AddEnrollProgram(EnrollProgramReqDTO addEnrollProgramReq)
         {
