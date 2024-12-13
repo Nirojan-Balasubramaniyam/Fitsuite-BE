@@ -13,5 +13,6 @@ namespace GYMFeeManagement_System_BE.DTOs.Response
         public DateTime? AccessedDate { get; set; }
         public bool? Status { get; set; }
         public bool? Action { get; set; }
+
     }
 }

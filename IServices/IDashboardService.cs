@@ -4,6 +4,6 @@ namespace GYMFeeManagement_System_BE.IServices
 {
     public interface IDashboardService
     {
-        Task<PaymentSummaryResDTO> GetPaymentSummary(int branchId);
+        Task<PaymentSummaryResDTO> GetPaymentSummary(int? branchId);
     }
 }

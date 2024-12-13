@@ -17,15 +17,16 @@ namespace GYMFeeManagement_System_BE.Services
             _alertService = alertService;
         }
 
-        public async Task<PaymentSummaryResDTO> GetPaymentSummary(int branchId)
+        public async Task<PaymentSummaryResDTO> GetPaymentSummary(int? branchId)
         {
             // Get all active members for the current month
-            var members = await _memberService.GetAllMembers(0, 0, true, branchId);
+            var members = await _memberService.GetAllMembers(0, 0, true, branchId??0);
             var totalMonthlyPayment = members.Data.Sum(m => m.MonthlyPayment);
 
             // Initialize variables to track total paid and overdue payments
             decimal totalPaid = 0;
             decimal overduePayment = 0;
+            decimal remainAmountToPay = 0;
 
             // Process each member
             foreach (var member in members.Data)
@@ -41,63 +42,67 @@ namespace GYMFeeManagement_System_BE.Services
 
                     bool isPaidThisMonth = DateTime.Now >= paidDate && (dueDate == null || DateTime.Now <= dueDate);
 
+                    bool isOverdue = DateTime.Now > dueDate;
+
                     if (isPaidThisMonth)
                     {
                         // If the payment is valid for this month, add the member's monthly payment to totalPaid
                         totalPaid += member.MonthlyPayment;
                     }
+                    else if(isOverdue)
+                    {
+                        overduePayment += member.MonthlyPayment;
+                        bool hasOverdueAlert = false;
+                        // Check if an overdue alert already exists for this member
+                        var existingAlerts = await _alertService.GetAlertsByAlertType("Overdue");
+                        if(existingAlerts != null)
+                        {
+                            hasOverdueAlert = existingAlerts.Any(alert => alert.MemberId == member.MemberId);
+
+                        }
+
+                        if (!hasOverdueAlert)
+                        {
+                            // If no overdue alert exists, add the monthly payment to overduePayment and create an alert
+                            
+
+                            var alertReq = new AlertReqDTO
+                            {
+                                AlertType = "Overdue",
+                                Amount = member.MonthlyPayment,
+                                MemberId = member.MemberId,
+                                DueDate = DateTime.Now, // Current date as the due date
+                                Status = true,
+                                Action = true,
+                                AccessedDate = DateTime.Now
+                            };
+
+                            await _alertService.AddAlert(alertReq);
+                        }
+                    }
                     else
                     {
-                        // If the payment is overdue, add the monthly payment to overduePayment and create an alert
-                        overduePayment += member.MonthlyPayment;
-
-                        // Create an alert for overdue payment
-                        var alertReq = new AlertReqDTO
-                        {
-                            AlertType = "Overdue",
-                            Amount = member.MonthlyPayment,
-                            MemberId = member.MemberId,
-                            DueDate = DateTime.Now, // Current date as the due date
-                            Status = true,
-                            Action = true,
-                            AccessedDate = DateTime.Now
-                        };
-
-                        await _alertService.AddAlert(alertReq);
+                        remainAmountToPay += member.MonthlyPayment;
                     }
+                   
                 }
-                else
-                {
-                    // If no payment exists for the member, treat it as overdue
-                    overduePayment += member.MonthlyPayment;
-
-                    // Create an alert for overdue payment if no payment is found
-                    var alertReq = new AlertReqDTO
-                    {
-                        AlertType = "Overdue",
-                        Amount = member.MonthlyPayment,
-                        MemberId = member.MemberId,
-                        DueDate = DateTime.Now, // Current date as the due date
-                        Status = true,
-                        Action = true,
-                        AccessedDate = DateTime.Now
-                    };
-
-                    await _alertService.AddAlert(alertReq);
-
-                }
+               
             }
 
             // Calculate the sum and percentages
             var totalAmountToPay = totalMonthlyPayment;
+            remainAmountToPay = remainAmountToPay==0 ? overduePayment : remainAmountToPay;
             var paidPercentage = totalAmountToPay > 0 ? (totalPaid / totalAmountToPay) * 100 : 0;
             var overduePercentage = totalAmountToPay > 0 ? (overduePayment / totalAmountToPay) * 100 : 0;
+            var remainAmountToPayPercentage = totalAmountToPay > 0 ? (remainAmountToPay / totalAmountToPay) * 100 : 0;
 
             // Return the payment summary response
             return new PaymentSummaryResDTO
             {
                 TotalMonthlyPayment = totalAmountToPay,
                 TotalPaid = totalPaid,
+                RemainAmountToPay = remainAmountToPay,
+                RemainAmounToPayPercentage = remainAmountToPayPercentage,
                 OverduePayment = overduePayment,
                 PaidPercentage = paidPercentage,
                 OverduePercentage = overduePercentage

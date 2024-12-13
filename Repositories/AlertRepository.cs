@@ -57,10 +57,10 @@ namespace GYMFeeManagement_System_BE.Repositories
             var memberAlerts = await query.ToListAsync();
 
             
-            if (memberAlerts == null || !memberAlerts.Any())
+           /* if (memberAlerts == null || !memberAlerts.Any())
             {
                 throw new Exception($"{alertType} Alerts not found for the specified branch!");
-            }
+            }*/
 
             return memberAlerts;
         }

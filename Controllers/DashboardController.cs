@@ -16,7 +16,7 @@ namespace GYMFeeManagement_System_BE.Controllers
         }
 
         [HttpGet("payment-summary")]
-        public async Task<IActionResult> GetPaymentSummary(int branchId)
+        public async Task<IActionResult> GetPaymentSummary(int? branchId)
         {
             var paymentSummary = await _dashboardService.GetPaymentSummary(branchId);
             return Ok(paymentSummary);
