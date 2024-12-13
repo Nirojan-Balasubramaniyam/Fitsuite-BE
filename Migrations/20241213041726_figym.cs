@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GYMFeeManagement_System_BE.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class figym : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,8 @@ namespace GYMFeeManagement_System_BE.Migrations
                 {
                     BranchId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    BranchName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    BranchName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -70,7 +71,7 @@ namespace GYMFeeManagement_System_BE.Migrations
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserRole = table.Column<int>(type: "int", nullable: false),
-                    BranchId = table.Column<int>(type: "int", nullable: false)
+                    BranchId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -92,6 +93,7 @@ namespace GYMFeeManagement_System_BE.Migrations
                     TypeId = table.Column<int>(type: "int", nullable: false),
                     ProgramName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Cost = table.Column<decimal>(type: "decimal(8,2)", precision: 8, scale: 2, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -122,8 +124,9 @@ namespace GYMFeeManagement_System_BE.Migrations
                     EmergencyContactName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EmergencyContactNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    StaffId = table.Column<int>(type: "int", nullable: true),
-                    BranchId = table.Column<int>(type: "int", nullable: false)
+                    TrainerId = table.Column<int>(type: "int", nullable: true),
+                    BranchId = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -135,8 +138,8 @@ namespace GYMFeeManagement_System_BE.Migrations
                         principalColumn: "BranchId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Members_Staffs_StaffId",
-                        column: x => x.StaffId,
+                        name: "FK_Members_Staffs_TrainerId",
+                        column: x => x.TrainerId,
                         principalTable: "Staffs",
                         principalColumn: "StaffId",
                         onDelete: ReferentialAction.Restrict);
@@ -440,9 +443,9 @@ namespace GYMFeeManagement_System_BE.Migrations
                 column: "BranchId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Members_StaffId",
+                name: "IX_Members_TrainerId",
                 table: "Members",
-                column: "StaffId");
+                column: "TrainerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_MemberId",
