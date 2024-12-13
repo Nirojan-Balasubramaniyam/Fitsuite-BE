@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GYMFeeManagement_System_BE.Migrations
 {
     [DbContext(typeof(GymDbContext))]
-    [Migration("20241130111321_init")]
-    partial class init
+    [Migration("20241213041726_figym")]
+    partial class figym
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -139,6 +139,9 @@ namespace GYMFeeManagement_System_BE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.HasKey("BranchId");
 
                     b.ToTable("Branches");
@@ -235,6 +238,9 @@ namespace GYMFeeManagement_System_BE.Migrations
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -251,14 +257,14 @@ namespace GYMFeeManagement_System_BE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("StaffId")
+                    b.Property<int?>("TrainerId")
                         .HasColumnType("int");
 
                     b.HasKey("MemberId");
 
                     b.HasIndex("BranchId");
 
-                    b.HasIndex("StaffId");
+                    b.HasIndex("TrainerId");
 
                     b.ToTable("Members");
                 });
@@ -432,7 +438,7 @@ namespace GYMFeeManagement_System_BE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StaffId"));
 
-                    b.Property<int>("BranchId")
+                    b.Property<int?>("BranchId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DoB")
@@ -490,6 +496,10 @@ namespace GYMFeeManagement_System_BE.Migrations
                     b.Property<decimal>("Cost")
                         .HasPrecision(8, 2)
                         .HasColumnType("decimal(8,2)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
@@ -640,7 +650,7 @@ namespace GYMFeeManagement_System_BE.Migrations
 
                     b.HasOne("GYMFeeManagement_System_BE.Entities.Staff", "Staff")
                         .WithMany("Members")
-                        .HasForeignKey("StaffId")
+                        .HasForeignKey("TrainerId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Branch");
@@ -650,13 +660,13 @@ namespace GYMFeeManagement_System_BE.Migrations
 
             modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.Payment", b =>
                 {
-                    b.HasOne("GYMFeeManagement_System_BE.Entities.Member", "member")
+                    b.HasOne("GYMFeeManagement_System_BE.Entities.Member", "Member")
                         .WithMany("Payments")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("member");
+                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.Request", b =>
@@ -692,8 +702,7 @@ namespace GYMFeeManagement_System_BE.Migrations
                     b.HasOne("GYMFeeManagement_System_BE.Entities.Branch", "Branch")
                         .WithMany("Staffs")
                         .HasForeignKey("BranchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Branch");
                 });
