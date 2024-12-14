@@ -10,6 +10,7 @@ namespace GYMFeeManagement_System_BE.IServices
         Task<PaymentResDTO> GetPaymentById(int trainingPaymentId);
         Task<List<PaymentResDTO>> GetAllPayments();
         Task<ICollection<PaymentResDTO>> GetAllPaymentsByBranchId(int? branchId);
+        Task<ICollection<PaymentResDTO>> GetPaymentsByMemberId(int memberId);
         Task<PaymentResDTO> GetLastRenewalPaymentForMember(int memberId);
         Task<PaymentResDTO> AddPayment(PaymentReqDTO addPaymentReq);
         Task<PaymentResDTO> UpdatePayment(int trainingPaymentId, PaymentReqDTO updatePaymentReq);

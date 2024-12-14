@@ -46,6 +46,7 @@ namespace GYMFeeManagement_System_BE.Services
                 Gender = member.Gender,
                 EmergencyContactName = member.EmergencyContactName,
                 EmergencyContactNumber = member.EmergencyContactNumber,
+                Bmi = member.Bmi,
                 ImagePath = member.ImagePath,
                 TrainerId = member.TrainerId,
                 BranchId = member.BranchId,
@@ -93,6 +94,7 @@ namespace GYMFeeManagement_System_BE.Services
                 Gender = member.Gender,
                 EmergencyContactName = member.EmergencyContactName,
                 EmergencyContactNumber = member.EmergencyContactNumber,
+                Bmi = member.Bmi,   
                 ImagePath = member.ImagePath,
                 TrainerId = member.TrainerId,
                 Address = member.Address != null ? new AddressResDTO
@@ -138,6 +140,7 @@ namespace GYMFeeManagement_System_BE.Services
                 EmergencyContactNumber = addMemberReq.EmergencyContactNumber,
                 TrainerId = addMemberReq.StaffId,
                 BranchId = addMemberReq.BranchId,
+                
                 Address = new Address
                 {
                     Street = addMemberReq.Address.Street,
@@ -180,6 +183,7 @@ namespace GYMFeeManagement_System_BE.Services
             existingMember.LastName = updateMemberReq.LastName ?? existingMember.LastName;
             existingMember.Email = updateMemberReq.Email ?? existingMember.Email;
             existingMember.NIC = updateMemberReq.NIC ?? existingMember.NIC;
+            existingMember.Bmi = updateMemberReq.Bmi ?? existingMember.Bmi;
             existingMember.Phone = updateMemberReq.Phone ?? existingMember.Phone;
             existingMember.DoB = updateMemberReq.DoB != default ? updateMemberReq.DoB : existingMember.DoB;
             existingMember.Gender = updateMemberReq.Gender ?? existingMember.Gender;
@@ -225,6 +229,7 @@ namespace GYMFeeManagement_System_BE.Services
                 Gender = updatedMember.Gender,
                 EmergencyContactName = updatedMember.EmergencyContactName,
                 EmergencyContactNumber = updatedMember.EmergencyContactNumber,
+                Bmi  = updatedMember.Bmi,
                 ImagePath = updatedMember.ImagePath,
                 TrainerId = updatedMember.TrainerId,
                 Address = updatedMember.Address != null ? new AddressResDTO

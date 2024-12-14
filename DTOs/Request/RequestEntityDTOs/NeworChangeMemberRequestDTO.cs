@@ -10,6 +10,7 @@
         public string? NIC { get; set; }
         public DateTime? DOB { get; set; }
         public string? Gender { get; set; }
+        public string? PaymentReceipt { get; set; }
         public AddressReqDTO? Address { get; set; }
         public IFormFile? ImageFile { get; set; }
         public string? EmergencyContactName { get; set; }

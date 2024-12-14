@@ -16,6 +16,7 @@ namespace GYMFeeManagement_System_BE.Entities
         public string Gender { get; set; }
         public string EmergencyContactName { get; set; }
         public string EmergencyContactNumber { get; set; }
+        public int? Bmi {  get; set; }
         public string? ImagePath { get; set; }
         public int? TrainerId { get; set; }
         public Staff? Staff { get; set; }

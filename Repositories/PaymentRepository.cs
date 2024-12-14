@@ -54,6 +54,7 @@ namespace GYMFeeManagement_System_BE.Repositories
             {
                 // Apply pagination
                 paymentList = await query
+                    .OrderByDescending(payment => payment.PaymentId)
                     .Skip((pageNumber.Value - 1) * pageSize.Value)
                     .Take(pageSize.Value)
                     .ToListAsync();
@@ -77,27 +78,20 @@ namespace GYMFeeManagement_System_BE.Repositories
 
         public async Task<ICollection<Payment>> GetAllPaymentsByBranchId(int? branchId)
         {
-            var query = _dbContext.Payments.AsQueryable(); // Start with a queryable
+            var query = _dbContext.Payments.AsQueryable(); 
 
-            // If a branchId is provided, filter by that branchId
             if (branchId.HasValue)
             {
                 query = query.Where(p => p.Member.BranchId == branchId.Value);
             }
 
-            // Include Member data
-            query = query.Include(p => p.Member);
+            query = query.Include(p => p.Member).OrderByDescending(payment => payment.PaymentId);
 
-            // Execute the query and return the result as a list of Payment entities
+           
             var payments = await query.ToListAsync();
 
             return payments;
         }
-
-
-
-
-
 
 
         public async Task<Payment> GetPaymentById(int paymentId)
@@ -110,7 +104,8 @@ namespace GYMFeeManagement_System_BE.Repositories
         public async Task<List<Payment>> GetPaymentsByMemberId(int memberId)
         {
             return await _dbContext.Payments
-                .Where(payment => payment.MemberId == memberId) // Filter by member ID
+                .Where(payment => payment.MemberId == memberId)
+                .OrderByDescending(payment => payment.PaymentId)
                 .ToListAsync();
         }
 

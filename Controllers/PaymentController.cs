@@ -66,6 +66,22 @@ namespace GYMFeeManagement_System_BE.Controllers
 
         }
 
+        [HttpGet("member-payments/{memberId}")]
+        public async Task<IActionResult> GetPaymentsByMemberId(int memberId)
+        {
+            try
+            {
+                var data = await _paymentService.GetPaymentsByMemberId(memberId);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+        }
+
         [HttpGet("all-payments")]
         public async Task<IActionResult> GetAllPayments()
         {

@@ -109,37 +109,27 @@ namespace GYMFeeManagement_System_BE.Services
             return paymentResDTO;
         }
 
+        public async Task<ICollection<PaymentResDTO>> GetPaymentsByMemberId(int memberId)
+        {
+            // Get payments from the repository
+            var payments = await _paymentRepository.GetPaymentsByMemberId(memberId);
 
-        /* public async Task<PaymentResDTO> AddPayment(PaymentReqDTO addPaymentReq)
-         {
+            // Map the Payment entities to PaymentResDTO
+            var paymentResDTOs = payments.Select(payment => new PaymentResDTO
+            {
+                PaymentId = payment.PaymentId,
+                MemberId = payment.MemberId,
+                PaymentType = payment.PaymentType,
+                Amount = payment.Amount,
+                PaymentMethod = payment.PaymentMethod,
+                PaidDate = payment.PaidDate,
+                DueDate = payment.DueDate
+            }).ToList();
 
-             var payment = new Payment
-             {
-                 MemberId = addPaymentReq.MemberId,
-                 PaymentType = addPaymentReq.PaymentType,
-                 PaymentMethod = addPaymentReq.PaymentMethod,
-                 Amount = addPaymentReq.Amount,
-                 PaidDate = addPaymentReq.PaidDate,
-                 DueDate = addPaymentReq.PaidDate.AddDays(30)
-             };
-
-             var addedPayment = await _paymentRepository.AddPayment(payment);
-
-             var paymentResDTO = new PaymentResDTO
-             {
-                 PaymentId = addedPayment.PaymentId,
-                 MemberId = addedPayment.MemberId,
-                 PaymentType = addedPayment.PaymentType,
-                 Amount = addedPayment.Amount,
-                 PaymentMethod = addedPayment.PaymentMethod,
-                 PaidDate = addedPayment.PaidDate,
-                 DueDate = addedPayment.DueDate
-             };
+            return paymentResDTOs;
+        }
 
 
-             return paymentResDTO;
-         }
- */
 
         public async Task<PaymentResDTO> AddPayment(PaymentReqDTO addPaymentReq)
         {

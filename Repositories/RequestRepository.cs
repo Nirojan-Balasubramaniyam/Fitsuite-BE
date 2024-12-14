@@ -26,27 +26,74 @@ namespace GYMFeeManagement_System_BE.Repositories
 
         }
 
+        /*  public async Task<PaginatedResponse<Request>> GetRequestByType(string requestType, int pageNumber, int pageSize)
+          {
+
+              pageNumber = pageNumber <= 0 ? 1 : pageNumber;
+              pageSize = pageSize <= 0 ? 10 : pageSize;
+
+              var totalRecords = await _dbContext.Requests
+                  .Where(r => r.RequestType == requestType)
+                  .CountAsync();
+
+              if (totalRecords == 0)
+              {
+                  throw new Exception("Requests not Found!");
+              }
+
+
+              var requests = await _dbContext.Requests
+                  .Where(r => r.RequestType == requestType)
+                  .Include(r => r.Address)
+                  .Skip((pageNumber - 1) * pageSize)
+                  .Take(pageSize)
+                  .ToListAsync();
+
+              var response = new PaginatedResponse<Request>
+              {
+                  TotalRecords = totalRecords,
+                  PageNumber = pageNumber,
+                  PageSize = pageSize,
+                  Data = requests
+              };
+
+              return response;
+          }*/
+
         public async Task<PaginatedResponse<Request>> GetRequestByType(string requestType, int pageNumber, int pageSize)
         {
-           
+            var query = _dbContext.Requests
+                .Where(r => r.RequestType == requestType)
+                .Include(r => r.Address);
+
+            // If pageNumber and pageSize are both 0, return all records
+            if (pageNumber == 0 || pageSize == 0)
+            {
+                var allRequests = await query.ToListAsync(); // Get all requests without pagination
+                var response1 = new PaginatedResponse<Request>
+                {
+                    TotalRecords = allRequests.Count,
+                    PageNumber = 1,  // Defaulting to 1 as no pagination
+                    PageSize = allRequests.Count, // Show total number of records
+                    Data = allRequests
+                };
+                return response1;
+            }
+
+            // Apply pagination if pageNumber and pageSize are valid
             pageNumber = pageNumber <= 0 ? 1 : pageNumber;
             pageSize = pageSize <= 0 ? 10 : pageSize;
 
-            var totalRecords = await _dbContext.Requests
-                .Where(r => r.RequestType == requestType)
-                .CountAsync();
+            var totalRecords = await query.CountAsync();
 
             if (totalRecords == 0)
             {
                 throw new Exception("Requests not Found!");
             }
 
-            
-            var requests = await _dbContext.Requests
-                .Where(r => r.RequestType == requestType)
-                .Include(r => r.Address)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+            var requests = await query
+                .Skip((pageNumber - 1) * pageSize)  // Pagination
+                .Take(pageSize)  // Pagination
                 .ToListAsync();
 
             var response = new PaginatedResponse<Request>
@@ -59,6 +106,7 @@ namespace GYMFeeManagement_System_BE.Repositories
 
             return response;
         }
+
 
 
         public async Task<List<Request>> GetAllRequests()

@@ -44,6 +44,7 @@ namespace GYMFeeManagement_System_BE.Services
                 Phone = requestDTO.Phone,
                 DOB = requestDTO.DOB,
                 Gender = requestDTO.Gender,
+                ReceiptNumber = requestDTO.PaymentReceipt,
                 EmergencyContactName = requestDTO.EmergencyContactName,
                 EmergencyContactNumber = requestDTO.EmergencyContactNumber,
                 Password = requestDTO.Password,
@@ -74,8 +75,10 @@ namespace GYMFeeManagement_System_BE.Services
                 Phone = addedRequest.Phone,
                 NIC = addedRequest.NIC,
                 DOB = addedRequest.DOB,
+                PaymentReceipt = addedRequest.ReceiptNumber,
                 Password = addedRequest.Password,   
                 Gender = addedRequest.Gender,
+                ImagePath = addedRequest.ImagePath,
                 Address = addedRequest.Address != null ? new AddressReqDTO
                 {
                     Street = addedRequest.Address.Street,
@@ -87,6 +90,7 @@ namespace GYMFeeManagement_System_BE.Services
                 EmergencyContactName = addedRequest.EmergencyContactName,
                 EmergencyContactNumber = addedRequest.EmergencyContactNumber,
                 Status = addedRequest.Status,
+
             };
         }
 
@@ -139,6 +143,7 @@ namespace GYMFeeManagement_System_BE.Services
                 DOB = request.DOB,
                 Gender = addedRequest.Gender,
                 Password = addedRequest.Password,
+                ImagePath = addedRequest.ImagePath,
                 Address = addedRequest.Address != null ? new AddressReqDTO
                 {
                     Street = addedRequest.Address.Street,
@@ -299,6 +304,8 @@ namespace GYMFeeManagement_System_BE.Services
                 NIC = request.NIC,
                 DOB = request.DOB,
                 Gender = request.Gender,
+                PaymentReceipt = request.ReceiptNumber,
+                ImagePath = request.ImagePath,
                 Password = request.Password,
                 Address = request.Address !=null ? new AddressReqDTO
                 {
@@ -337,6 +344,7 @@ namespace GYMFeeManagement_System_BE.Services
                 Phone = request.Phone,
                 NIC = request.NIC,
                 DOB = request.DOB,
+                ImagePath = request.ImagePath,
                 Password = request.Password,
                 Gender = request.Gender,
                 Address = request.Address != null ? new AddressReqDTO

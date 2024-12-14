@@ -14,6 +14,7 @@ namespace GYMFeeManagement_System_BE.DTOs.Request
         public string Gender { get; set; }
         public string EmergencyContactName { get; set; }
         public string EmergencyContactNumber { get; set; }
+        public int ? Bmi { get; set; }
         public IFormFile? ImageFile { get; set; }
         public int? StaffId { get; set; }
         public int BranchId { get; set; }

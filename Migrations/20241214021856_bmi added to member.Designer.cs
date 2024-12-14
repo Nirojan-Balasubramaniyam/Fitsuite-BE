@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GYMFeeManagement_System_BE.Migrations
 {
     [DbContext(typeof(GymDbContext))]
-    [Migration("20241213041726_figym")]
-    partial class figym
+    [Migration("20241214021856_bmi added to member")]
+    partial class bmiaddedtomember
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -208,6 +208,9 @@ namespace GYMFeeManagement_System_BE.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MemberId"));
+
+                    b.Property<int?>("Bmi")
+                        .HasColumnType("int");
 
                     b.Property<int>("BranchId")
                         .HasColumnType("int");

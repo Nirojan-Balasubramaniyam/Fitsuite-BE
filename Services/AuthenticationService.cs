@@ -62,7 +62,9 @@ namespace GYMFeeManagement_System_BE.Services
     {
         new Claim("UserId", member.MemberId.ToString()),
         new Claim("FullName", $"{member.FirstName} {member.LastName}"),
-        new Claim("Email", member.Email)
+        new Claim("Email", member.Email),
+        new Claim("UserRole", "Member")
+
         
     };
 
