@@ -24,6 +24,7 @@ namespace GYMFeeManagement_System_BE.Database
         public DbSet<Request> Requests { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<ContactUsMessage> ContactUsMessages { get; set; }
+        public DbSet<PaymentDiscount> PaymentDiscounts { get; set; }
 
         
 

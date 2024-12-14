@@ -99,6 +99,9 @@ namespace GYMFeeManagement_System_BE
             /*dashboard*/
             builder.Services.AddScoped<IDashboardService, DashboardService>();
 
+            builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
+            builder.Services.AddScoped<IDiscountService, DiscountService>();
+
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IAunthenticationRepository, AuthenticationRepository>();
 

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GYMFeeManagement_System_BE.Migrations
 {
     [DbContext(typeof(GymDbContext))]
-    [Migration("20241213041726_figym")]
-    partial class figym
+    [Migration("20241214100833_gyms")]
+    partial class gyms
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -303,6 +303,26 @@ namespace GYMFeeManagement_System_BE.Migrations
                     b.HasIndex("MemberId");
 
                     b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.PaymentDiscount", b =>
+                {
+                    b.Property<int>("DiscountId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DiscountId"));
+
+                    b.Property<int>("Discount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("DiscountId");
+
+                    b.ToTable("PaymentDiscounts");
                 });
 
             modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.ProgramType", b =>

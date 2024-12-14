@@ -302,6 +302,26 @@ namespace GYMFeeManagement_System_BE.Migrations
                     b.ToTable("Payments");
                 });
 
+            modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.PaymentDiscount", b =>
+                {
+                    b.Property<int>("DiscountId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DiscountId"));
+
+                    b.Property<int>("Discount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("DiscountId");
+
+                    b.ToTable("PaymentDiscounts");
+                });
+
             modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.ProgramType", b =>
                 {
                     b.Property<int>("TypeId")

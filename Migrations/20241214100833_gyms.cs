@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GYMFeeManagement_System_BE.Migrations
 {
     /// <inheritdoc />
-    public partial class figym : Migration
+    public partial class gyms : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -40,6 +40,20 @@ namespace GYMFeeManagement_System_BE.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ContactUsMessages", x => x.MessageId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PaymentDiscounts",
+                columns: table => new
+                {
+                    DiscountId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Discount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentDiscounts", x => x.DiscountId);
                 });
 
             migrationBuilder.CreateTable(
@@ -512,6 +526,9 @@ namespace GYMFeeManagement_System_BE.Migrations
 
             migrationBuilder.DropTable(
                 name: "EnrollPrograms");
+
+            migrationBuilder.DropTable(
+                name: "PaymentDiscounts");
 
             migrationBuilder.DropTable(
                 name: "Payments");
