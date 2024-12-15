@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GYMFeeManagement_System_BE.Migrations
 {
     [DbContext(typeof(GymDbContext))]
-    [Migration("20241215040608_cloudinary entity")]
-    partial class cloudinaryentity
+    [Migration("20241215071230_initial1")]
+    partial class initial1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
