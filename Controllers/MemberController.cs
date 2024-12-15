@@ -107,6 +107,25 @@ namespace GYMFeeManagement_System_BE.Controllers
             }
         }
 
+        [HttpPut("update-password/{memberId}")]
+        public async Task<IActionResult> UpdateMemberPassword(int memberId, [FromBody] UpdatePasswordRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(request?.Password))
+                {
+                    return BadRequest(new { message = "Password field is required." });
+                }
+
+                var data = await _memberService.UpdateMemberPassword(memberId, request.Password);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpDelete("{memberId}")]
         public async Task<IActionResult> DeleteMember(int memberId)
         {

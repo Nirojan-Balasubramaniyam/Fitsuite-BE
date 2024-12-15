@@ -19,13 +19,16 @@ namespace GYMFeeManagement_System_BE.Services
         private readonly ITrainingProgramRepository _trainingProgramRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IConfiguration _configuration;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public MemberService(IMemberRepository memberRepository, ITrainingProgramRepository trainingProgramRepository, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+        public MemberService(IMemberRepository memberRepository, CloudinaryService cloudinaryService,ITrainingProgramRepository trainingProgramRepository ,IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _memberRepository = memberRepository;
-            _trainingProgramRepository = trainingProgramRepository;
             _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
+            _cloudinaryService = cloudinaryService;
+            _trainingProgramRepository = trainingProgramRepository;
+
         }
 
         public async Task<PaginatedResponse<MemberResDTO>> GetAllMembers(int pageNumber, int pageSize, bool? isActive, int branchId = 0)
@@ -49,6 +52,7 @@ namespace GYMFeeManagement_System_BE.Services
                 Bmi = member.Bmi,
                 ImagePath = member.ImagePath,
                 TrainerId = member.TrainerId,
+               
                 BranchId = member.BranchId,
                 Address = member.Address != null ? new AddressResDTO
                 {
@@ -154,7 +158,7 @@ namespace GYMFeeManagement_System_BE.Services
 
             if (addMemberReq.ImageFile != null)
             {
-                member.ImagePath = await SaveImageFileAsync(addMemberReq.ImageFile);
+                member.ImagePath = await UploadImage(addMemberReq.ImageFile);
             }
 
             var addedMember = await _memberRepository.AddMember(member);
@@ -198,7 +202,7 @@ namespace GYMFeeManagement_System_BE.Services
 
             if (updateMemberReq.ImageFile != null)
             {
-                existingMember.ImagePath = await SaveImageFileAsync(updateMemberReq.ImageFile);
+                existingMember.ImagePath = await UploadImage(updateMemberReq.ImageFile);
             }
 
             existingMember.PasswordHash = updateMemberReq.Password != null
@@ -230,6 +234,54 @@ namespace GYMFeeManagement_System_BE.Services
                 EmergencyContactName = updatedMember.EmergencyContactName,
                 EmergencyContactNumber = updatedMember.EmergencyContactNumber,
                 Bmi  = updatedMember.Bmi,
+                ImagePath = updatedMember.ImagePath,
+                TrainerId = updatedMember.TrainerId,
+                Address = updatedMember.Address != null ? new AddressResDTO
+                {
+                    AddressId = updatedMember.Address.AddressId,
+                    Street = updatedMember.Address.Street,
+                    City = updatedMember.Address.City,
+                    District = updatedMember.Address.District,
+                    Province = updatedMember.Address.Province,
+                    Country = updatedMember.Address.Country
+                } : null,
+                IsActive = updatedMember.IsActive
+            };
+
+            return updatedMemberRes;
+        }
+
+        public async Task<MemberResDTO> UpdateMemberPassword(int memberId, string password)
+        {
+            var existingMember = await _memberRepository.GetMemberById(memberId);
+            if (existingMember == null)
+            {
+                throw new Exception("Member id is invalid");
+            }
+
+
+
+
+            existingMember.PasswordHash = password != null
+                ? BCrypt.Net.BCrypt.HashPassword(password)
+                : existingMember.PasswordHash;
+
+            var updatedMember = await _memberRepository.UpdateMember(existingMember);
+
+
+            var updatedMemberRes = new MemberResDTO
+            {
+                MemberId = updatedMember.MemberId,
+                FirstName = updatedMember.FirstName,
+                LastName = updatedMember.LastName,
+                Email = updatedMember.Email,
+                NIC = updatedMember.NIC,
+                Phone = updatedMember.Phone,
+                DoB = updatedMember.DoB,
+                Gender = updatedMember.Gender,
+                EmergencyContactName = updatedMember.EmergencyContactName,
+                EmergencyContactNumber = updatedMember.EmergencyContactNumber,
+                Bmi = updatedMember.Bmi,
                 ImagePath = updatedMember.ImagePath,
                 TrainerId = updatedMember.TrainerId,
                 Address = updatedMember.Address != null ? new AddressResDTO
@@ -334,6 +386,36 @@ namespace GYMFeeManagement_System_BE.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
 
 
+        }
+
+        public async Task<string> UploadImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                throw new Exception("No file uploaded.");
+            }
+
+            // Get the file stream and file name
+            using (var stream = file.OpenReadStream())
+            {
+                // Upload image to Cloudinary and get the URL
+                var imageUrl = await _cloudinaryService.UploadImageAsync(stream, file.FileName);
+
+                // Create the image object to store in the database
+                var image = new Image
+                {
+                    Url = imageUrl,
+                    FileName = file.FileName,
+                    UploadedOn = DateTime.UtcNow
+                };
+
+                // Save image URL in the database
+                /*  _context.Images.Add(image);
+                  await _context.SaveChangesAsync();*/
+
+                // Return the URL of the uploaded image
+                return image.Url;
+            }
         }
     }
 }

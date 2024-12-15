@@ -30,34 +30,42 @@ namespace GYMFeeManagement_System_BE.Repositories
         }
 
 
-        public async Task<PaginatedResponse<Staff>> GetAllStaffs(int pageNumber, int pageSize)
+        public async Task<PaginatedResponse<Staff>> GetAllStaffs(int pageNumber, int pageSize, bool isActive)
         {
-            // Set default values if inputs are invalid
-            pageNumber = pageNumber <= 0 ? 1 : pageNumber;
-            pageSize = pageSize <= 0 ? 10 : pageSize;
+            var query = _dbContext.Staffs.AsQueryable();
 
-            var totalRecords = await _dbContext.Staffs.CountAsync(); // Total records for pagination
-            if (totalRecords == 0)
+            if (isActive != null)
+                query = query.Where(s => s.IsActive == isActive);
+
+            if (pageNumber == 0 || pageSize == 0)
             {
-                throw new Exception("Staffs not Found");
+                var allStaff = await query.Include(s => s.Address).ToListAsync();
+                return new PaginatedResponse<Staff>
+                {
+                    TotalRecords = allStaff.Count,
+                    PageNumber = 1,
+                    PageSize = allStaff.Count,
+                    Data = allStaff
+                };
             }
 
-            var memberList = await _dbContext.Staffs
-                .Include(m => m.Address)
+            var totalRecords = await query.CountAsync();
+
+            var staffList = await query
+                .Include(s => s.Address)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            var response = new PaginatedResponse<Staff>
+            return new PaginatedResponse<Staff>
             {
                 TotalRecords = totalRecords,
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                Data = memberList
+                Data = staffList
             };
-
-            return response;
         }
+
 
 
         public async Task<Staff> GetStaffById(int staffId)

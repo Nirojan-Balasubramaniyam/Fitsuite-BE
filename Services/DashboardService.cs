@@ -83,6 +83,36 @@ namespace GYMFeeManagement_System_BE.Services
                     else
                     {
                         remainAmountToPay += member.MonthlyPayment;
+
+                        // Check if the current date is 5 days before the due date and create a Renewal alert
+                        if (dueDate.HasValue && dueDate.Value > DateTime.Now && (dueDate.Value - DateTime.Now).TotalDays <= 5)
+                        {
+                            bool hasRenewalAlert = false;
+
+                            // Check if a renewal alert already exists for this member
+                            var existingRenewalAlerts = await _alertService.GetAlertsByAlertType("Renewal");
+                            if (existingRenewalAlerts != null)
+                            {
+                                hasRenewalAlert = existingRenewalAlerts.Any(alert => alert.MemberId == member.MemberId);
+                            }
+
+                            if (!hasRenewalAlert)
+                            {
+                                // If no renewal alert exists, create a new renewal alert
+                                var renewalAlert = new AlertReqDTO
+                                {
+                                    AlertType = "Renewal",
+                                    Amount = member.MonthlyPayment,
+                                    MemberId = member.MemberId,
+                                    DueDate = dueDate.Value,
+                                    Status = true,
+                                    Action = true,
+                                    AccessedDate = DateTime.Now
+                                };
+
+                                await _alertService.AddAlert(renewalAlert);
+                            }
+                        }
                     }
                    
                 }

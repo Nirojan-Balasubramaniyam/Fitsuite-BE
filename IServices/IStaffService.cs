@@ -6,7 +6,7 @@ namespace GYMFeeManagement_System_BE.IServices
 {
     public interface IStaffService
     {
-        Task<PaginatedResponse<StaffResDTO>> GetAllStaffs(int pageNumber, int pageSize);
+        Task<PaginatedResponse<StaffResDTO>> GetAllStaffs(int pageNumber, int pageSize, bool isActive);
         Task<StaffResDTO> GetStaffById(int staffId);
         Task<string> AddStaff(StaffReqDTO addStaffReq);
         Task<StaffResDTO> UpdateStaff(int staffId, StaffReqDTO updateStaffReq);

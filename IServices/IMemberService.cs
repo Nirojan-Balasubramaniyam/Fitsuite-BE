@@ -12,5 +12,6 @@ namespace GYMFeeManagement_System_BE.IServices
         Task<MemberResDTO> GetMemberById(int memberId);
         Task<MemberResDTO> UpdateMember(int memberId, MemberReqDTO updateMemberReq);
         Task DeleteMember(int memberId);
+        Task<MemberResDTO> UpdateMemberPassword(int memberId, string password);
     }
 }

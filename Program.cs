@@ -1,11 +1,13 @@
 
 using GYMFeeManagement_System_BE.Database;
+using GYMFeeManagement_System_BE.Entities;
 using GYMFeeManagement_System_BE.IRepositories;
 using GYMFeeManagement_System_BE.IServices;
 using GYMFeeManagement_System_BE.Repositories;
 using GYMFeeManagement_System_BE.Services;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -35,6 +37,13 @@ namespace GYMFeeManagement_System_BE
             {
                 options.ValueCountLimit = 5000; // Adjust this value as needed
             });
+
+
+            // Bind Cloudinary settings from appsettings.json
+            builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("Cloudinary"));
+
+            // Register the CloudinaryService
+            builder.Services.AddScoped<CloudinaryService>();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -98,6 +107,18 @@ namespace GYMFeeManagement_System_BE
 
             /*dashboard*/
             builder.Services.AddScoped<IDashboardService, DashboardService>();
+
+            // Register EmailConfig
+            builder.Services.Configure<EmailConfig>(builder.Configuration.GetSection("EmailConfig"));
+
+            // Register services
+            builder.Services.AddScoped<sendmailService>();
+            builder.Services.AddScoped<SendMailRepository>();
+            builder.Services.AddScoped<EmailServiceProvider>();
+
+
+            // Ensure EmailConfig is available as a singleton if needed
+            builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmailConfig>>().Value);
 
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddScoped<IAunthenticationRepository, AuthenticationRepository>();

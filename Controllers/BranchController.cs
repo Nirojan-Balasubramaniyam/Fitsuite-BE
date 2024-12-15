@@ -65,20 +65,18 @@ namespace GYMFeeManagement_System_BE.Controllers
         }
 
 
-        [HttpPut]
+        [HttpPut("{branchId}")]
         public async Task<IActionResult> UpdateBranch(int branchId, BranchReqDTO branchRequest)
         {
             try
             {
                 var data = await _branchService.UpdateBranch(branchId, branchRequest);
                 return Ok(data);
-
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-
         }
 
         [HttpDelete("{branchId}")]

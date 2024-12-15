@@ -24,9 +24,9 @@ namespace GYMFeeManagement_System_BE.Services
             _configuration = configuration;
         }
 
-        public async Task<PaginatedResponse<StaffResDTO>> GetAllStaffs(int pageNumber, int pageSize)
+        public async Task<PaginatedResponse<StaffResDTO>> GetAllStaffs(int pageNumber, int pageSize, bool isActive)
         {
-            var staffList = await _staffRepository.GetAllStaffs(pageNumber, pageSize);
+            var staffList = await _staffRepository.GetAllStaffs(pageNumber, pageSize, isActive);
 
             var staffResList = staffList.Data.Select(staff => new StaffResDTO
             {

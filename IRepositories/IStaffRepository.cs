@@ -6,7 +6,7 @@ namespace GYMFeeManagement_System_BE.IRepositories
     public interface IStaffRepository
     {
         Task<Staff> AddStaff(Staff staff);
-        Task<PaginatedResponse<Staff>> GetAllStaffs(int pageNumber, int pageSize);
+        Task<PaginatedResponse<Staff>> GetAllStaffs(int pageNumber, int pageSize, bool isActive);
         Task<Staff> GetStaffById(int staffId);
         Task<bool> AdminIsAssignedToAnotherBranchAsync(int adminStaffId);
         Task<Staff> GetStaffByEmail(string email);

@@ -24,8 +24,11 @@ namespace GYMFeeManagement_System_BE.Database
         public DbSet<Request> Requests { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<ContactUsMessage> ContactUsMessages { get; set; }
+        public DbSet<EmailTemplate> EmailTemplates { get; set; }
+        public DbSet<Image> Images { get; set; }
 
-        
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

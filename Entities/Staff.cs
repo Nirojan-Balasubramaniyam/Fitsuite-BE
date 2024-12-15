@@ -20,6 +20,8 @@ namespace GYMFeeManagement_System_BE.Entities
         public int? BranchId { get; set; }
         public Branch? Branch { get; set; }
         public Address? Address { get; set; }
+        public bool IsActive { get; set; }
+
 
         public ICollection<WorkoutPlan> WorkoutPlans { get; set; } 
         public ICollection<WorkoutEnrollment> WorkoutEnrollments { get; set; }
