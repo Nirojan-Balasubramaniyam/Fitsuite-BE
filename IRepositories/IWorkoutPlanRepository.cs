@@ -1,4 +1,5 @@
 ﻿using GYMFeeManagement_System_BE.DTOs.Response;
+using GYMFeeManagement_System_BE.DTOs.Response.RequestResponseDTOs;
 using GYMFeeManagement_System_BE.Entities;
 
 namespace GYMFeeManagement_System_BE.IRepositories
@@ -12,5 +13,8 @@ namespace GYMFeeManagement_System_BE.IRepositories
         Task<WorkoutPlan> GetWorkoutPlanByName(string workoutName);
         Task<WorkoutPlan> UpdateWorkoutPlan(WorkoutPlan updateWorkoutPlan);
         Task DeleteWorkoutPlan(int workoutPlanId);
+        Task<ICollection<UniqueMembers>> GetAllUniqueMembers();
+        Task<ICollection<WorkoutPlan>> GetWorkoutPlanIsDoneByMenberId(int MemberId);
+        Task<ICollection<WorkoutPlan>> GetWorkoutPlanByMenberId(int MemberId);
     }
 }

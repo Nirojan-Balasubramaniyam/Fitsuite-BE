@@ -1,4 +1,6 @@
 ﻿using GYMFeeManagement_System_BE.DTOs.Request;
+using GYMFeeManagement_System_BE.DTOs.Response;
+using GYMFeeManagement_System_BE.Entities;
 using GYMFeeManagement_System_BE.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -101,6 +103,65 @@ namespace GYMFeeManagement_System_BE.Controllers
                 return BadRequest(ex.Message);
             }
 
+        }
+
+        [HttpGet("Start/{Id}")]
+        public async Task<IActionResult> StartWorkOutPlane(int Id)
+        {
+            try
+            {
+                var data = await _workoutPlanService.StartWorkOutPlane(Id);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("End/{Id}")]
+        public async Task<IActionResult> EndWorkOutPlane(int Id)
+        {
+            try
+            {
+                var data = await _workoutPlanService.EndWorkOutPlane(Id);
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("UniqueMembers")]
+
+        public async Task<IActionResult> GetAllUniqueMembers()
+        {
+            try
+            {
+                var data = await _workoutPlanService.GetAllUniqueMembers();
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("Done/{MemberId}")]
+        public async Task<IActionResult> GetWorkoutPlanIsDoneByMenberId(int MemberId)
+        {
+            var workoutPlan = await _workoutPlanService.GetWorkoutPlanIsDoneByMenberId(MemberId);
+            return Ok(workoutPlan);
+        }
+
+        [HttpGet("All/{MemberId}")]
+        public async Task<IActionResult> GetWorkoutPlanByMenberId(int MemberId)
+        {
+            var workoutPlan = await _workoutPlanService.GetWorkoutPlanByMenberId(MemberId);
+            return Ok(workoutPlan);
         }
     }
 }

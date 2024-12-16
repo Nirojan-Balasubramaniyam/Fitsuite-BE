@@ -3,6 +3,8 @@ using GYMFeeManagement_System_BE.Entities;
 using GYMFeeManagement_System_BE.IRepositories;
 using GYMFeeManagement_System_BE.IServices;
 using GYMFeeManagement_System_BE.DTOs.Response;
+using GYMFeeManagement_System_BE.DTOs.Response.RequestResponseDTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace GYMFeeManagement_System_BE.Services
 {
@@ -25,7 +27,11 @@ namespace GYMFeeManagement_System_BE.Services
                 Name = workoutPlan.Name,
                 RepsCount = workoutPlan.RepsCount,
                 Weight = workoutPlan.Weight,
-                StaffId = workoutPlan.StaffId
+                StaffId = workoutPlan.StaffId,
+                MemberId = workoutPlan.MemberId,
+                StartTime = workoutPlan.StartTime,
+                EndTime = workoutPlan.EndTime,
+                isDone = workoutPlan.isDone
             }).ToList();
 
             // Return the paginated response with DTOs
@@ -49,7 +55,11 @@ namespace GYMFeeManagement_System_BE.Services
                 Name = workoutPlan.Name,
                 RepsCount = workoutPlan.RepsCount,
                 Weight = workoutPlan.Weight,
-                StaffId = workoutPlan.StaffId
+                StaffId = workoutPlan.StaffId,
+                MemberId = workoutPlan.MemberId,
+                StartTime = workoutPlan.StartTime,
+                EndTime = workoutPlan.EndTime,
+                isDone = workoutPlan.isDone
             };
         }
 
@@ -62,7 +72,9 @@ namespace GYMFeeManagement_System_BE.Services
                Name = addWorkoutPlanReq.Name,
                RepsCount = addWorkoutPlanReq.RepsCount,
                Weight = addWorkoutPlanReq.Weight,
-               StaffId = addWorkoutPlanReq.StaffId
+               StaffId = addWorkoutPlanReq.StaffId,
+               MemberId = addWorkoutPlanReq.MemberId,
+               isDone = false,
             };
 
             var addedWorkoutPlan = await _workoutPlanRepository.AddWorkoutPlan(workoutPlan);
@@ -73,7 +85,8 @@ namespace GYMFeeManagement_System_BE.Services
                 Name = addedWorkoutPlan.Name,
                 RepsCount = addedWorkoutPlan.RepsCount,
                 Weight = addedWorkoutPlan.Weight,
-                StaffId = addedWorkoutPlan.StaffId
+                StaffId = addedWorkoutPlan.StaffId,
+                isDone=addedWorkoutPlan.isDone,
             };
         }
 
@@ -133,6 +146,81 @@ namespace GYMFeeManagement_System_BE.Services
                 // Otherwise, the name is already taken by another program
                 throw new ArgumentException($"{workoutName} has already registered.");
             }
+        }
+
+
+        public async Task<string> StartWorkOutPlane(int Id)
+        {
+            var data = await _workoutPlanRepository.GetWorkoutPlanById(Id);
+            if(data == null)
+            {
+                throw new Exception("Data Not Found");
+            }
+
+            data.StartTime = DateTime.Now;
+
+            await _workoutPlanRepository.UpdateWorkoutPlan(data);
+
+            return "Plan Started";
+        }
+
+        public async Task<string> EndWorkOutPlane(int Id)
+        {
+            var data = await _workoutPlanRepository.GetWorkoutPlanById(Id);
+            if (data == null)
+            {
+                throw new Exception("Data Not Found");
+            }
+
+            data.EndTime = DateTime.Now;
+
+            await _workoutPlanRepository.UpdateWorkoutPlan(data);
+
+            return "Plan Ented";
+        }
+
+        public async Task<ICollection<UniqueMembers>> GetAllUniqueMembers()
+        {
+            var data = await _workoutPlanRepository.GetAllUniqueMembers();
+            return data;
+        }
+
+        public async Task<ICollection<WorkoutPlanResDTO>> GetWorkoutPlanIsDoneByMenberId(int MemberId)
+        {
+            var workoutPlan = await GetWorkoutPlanIsDoneByMenberId(MemberId);
+            if (workoutPlan == null) throw new Exception("WorkoutPlan Not Found");
+            
+            return workoutPlan.Select(wp => new WorkoutPlanResDTO()
+            {
+                WorkoutPlanId = wp.WorkoutPlanId,
+                Name = wp.Name,
+                RepsCount = wp.RepsCount,
+                Weight = wp.Weight,
+                StaffId = wp.StaffId,
+                MemberId = wp.MemberId,
+                StartTime = wp.StartTime,
+                EndTime = wp.EndTime,
+                isDone = wp.isDone
+            }).ToList();
+        }
+
+        public async Task<ICollection<WorkoutPlanResDTO>> GetWorkoutPlanByMenberId(int MemberId)
+        {
+            var workoutPlan = await GetWorkoutPlanByMenberId(MemberId);
+            if (workoutPlan == null) throw new Exception("WorkoutPlan Not Found");
+
+            return workoutPlan.Select(wp => new WorkoutPlanResDTO()
+            {
+                WorkoutPlanId = wp.WorkoutPlanId,
+                Name = wp.Name,
+                RepsCount = wp.RepsCount,
+                Weight = wp.Weight,
+                StaffId = wp.StaffId,
+                MemberId = wp.MemberId,
+                StartTime = wp.StartTime,
+                EndTime = wp.EndTime,
+                isDone = wp.isDone
+            }).ToList();
         }
     }
 }

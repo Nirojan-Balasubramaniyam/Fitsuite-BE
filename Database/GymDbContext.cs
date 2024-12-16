@@ -106,12 +106,6 @@ namespace GYMFeeManagement_System_BE.Database
                 .HasForeignKey(tp => tp.MemberId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<WorkoutEnrollment>()
-                .HasOne(we => we.WorkoutPlan)
-                .WithMany(wp => wp.WorkoutEnrollments) 
-                .HasForeignKey(we => we.WorkoutPlanId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             modelBuilder.Entity<TrainingProgram>()
                 .HasOne(tp => tp.ProgramType)
                 .WithMany(pt => pt.TrainingPrograms)
