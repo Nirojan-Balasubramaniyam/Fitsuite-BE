@@ -11,12 +11,16 @@ namespace GYMFeeManagement_System_BE.Services
         private readonly ITrainingProgramRepository _trainingProgramRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IConfiguration _configuration;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public TrainingProgramService(ITrainingProgramRepository trainingProgramRepository, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+
+        public TrainingProgramService(ITrainingProgramRepository trainingProgramRepository, CloudinaryService cloudinaryService, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _trainingProgramRepository = trainingProgramRepository;
             _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
+            _cloudinaryService = cloudinaryService;
+
         }
 
         public async Task<ICollection<TrainingProgramResDTO>> GetAllTrainingPrograms()
@@ -105,7 +109,7 @@ namespace GYMFeeManagement_System_BE.Services
 
             if (addTrainingProgramReq.ImageFile != null)
             {
-                trainingProgram.ImagePath = await SaveImageFileAsync(addTrainingProgramReq.ImageFile);
+                trainingProgram.ImagePath = await UploadImage(addTrainingProgramReq.ImageFile);
             }
 
             var addedTrainingProgram = await _trainingProgramRepository.AddProgram(trainingProgram);
@@ -155,8 +159,8 @@ namespace GYMFeeManagement_System_BE.Services
 
         if (updateTrainingProgramReq.ImageFile != null)
         {
-            existingTrainingProgram.ImagePath = await SaveImageFileAsync(updateTrainingProgramReq.ImageFile);
-        }
+            existingTrainingProgram.ImagePath = await UploadImage(updateTrainingProgramReq.ImageFile);
+            }
 
         var updatedTrainingProgram = await _trainingProgramRepository.UpdateProgram(existingTrainingProgram);
 
@@ -214,6 +218,36 @@ namespace GYMFeeManagement_System_BE.Services
 
                 // Otherwise, the name is already taken by another program
                 throw new ArgumentException($"{programName} is already registered.");
+            }
+        }
+
+        public async Task<string> UploadImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                throw new Exception("No file uploaded.");
+            }
+
+            // Get the file stream and file name
+            using (var stream = file.OpenReadStream())
+            {
+                // Upload image to Cloudinary and get the URL
+                var imageUrl = await _cloudinaryService.UploadImageAsync(stream, file.FileName);
+
+                // Create the image object to store in the database
+                var image = new Image
+                {
+                    Url = imageUrl,
+                    FileName = file.FileName,
+                    UploadedOn = DateTime.UtcNow
+                };
+
+                // Save image URL in the database
+                /*  _context.Images.Add(image);
+                  await _context.SaveChangesAsync();*/
+
+                // Return the URL of the uploaded image
+                return image.Url;
             }
         }
 

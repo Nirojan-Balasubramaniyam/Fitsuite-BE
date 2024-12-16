@@ -205,9 +205,12 @@ namespace GYMFeeManagement_System_BE.Services
                 existingMember.ImagePath = await UploadImage(updateMemberReq.ImageFile);
             }
 
-            existingMember.PasswordHash = updateMemberReq.Password != null
-                ? BCrypt.Net.BCrypt.HashPassword(updateMemberReq.Password)
-                : existingMember.PasswordHash;
+            if(updateMemberReq.Password != null && updateMemberReq.Password!="") 
+            {
+                existingMember.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateMemberReq.Password);
+            }
+
+           
 
             if (existingMember.Address != null)
             {

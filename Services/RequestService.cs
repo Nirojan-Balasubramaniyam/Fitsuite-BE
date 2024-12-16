@@ -19,16 +19,19 @@ namespace GYMFeeManagement_System_BE.Services
         private readonly IMemberRepository _memberRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IConfiguration _configuration;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public RequestService(IRequestRepository requestRepository, IMemberRepository memberRepository, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+
+        public RequestService(IRequestRepository requestRepository, CloudinaryService cloudinaryService, IMemberRepository memberRepository, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _requestRepository = requestRepository;
             _memberRepository = memberRepository;
             _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
+            _cloudinaryService = cloudinaryService;
         }
 
-        public async Task<NeworChangeMemberRequestResDTO> AddMemberRequestAsync(NeworChangeMemberRequestDTO requestDTO)
+        public async Task<NeworChangeMemberRequestResDTO> AddMemberRequestAsync(NeworChangeMemberRequestDTO requestDTO, DateTime paidDate)
         {
 
             // Validate the email format and uniqueness
@@ -56,11 +59,12 @@ namespace GYMFeeManagement_System_BE.Services
                     Province = requestDTO.Address.Province,
                     Country = requestDTO.Address.Country,
                 } : null,
+                PaidDate = paidDate,
                 Status = "pending"
             };
             if (requestDTO.ImageFile != null)
             {
-                request.ImagePath = await SaveImageFileAsync(requestDTO.ImageFile);
+                request.ImagePath = await UploadImage(requestDTO.ImageFile);
             }
 
             var addedRequest = await _requestRepository.AddRequest(request);
@@ -126,7 +130,7 @@ namespace GYMFeeManagement_System_BE.Services
             };
             if (requestDTO.ImageFile != null)
             {
-                request.ImagePath = await SaveImageFileAsync(requestDTO.ImageFile);
+                request.ImagePath = await UploadImage(requestDTO.ImageFile);
             }
 
             var addedRequest = await _requestRepository.AddRequest(request);
@@ -142,7 +146,6 @@ namespace GYMFeeManagement_System_BE.Services
                 NIC = addedRequest.NIC,
                 DOB = request.DOB,
                 Gender = addedRequest.Gender,
-                Password = addedRequest.Password,
                 ImagePath = addedRequest.ImagePath,
                 Address = addedRequest.Address != null ? new AddressReqDTO
                 {
@@ -573,6 +576,36 @@ namespace GYMFeeManagement_System_BE.Services
                 throw new ArgumentException($"{email} is already in use. Please use a different email.");
             }
 
+        }
+
+        public async Task<string> UploadImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                throw new Exception("No file uploaded.");
+            }
+
+            // Get the file stream and file name
+            using (var stream = file.OpenReadStream())
+            {
+                // Upload image to Cloudinary and get the URL
+                var imageUrl = await _cloudinaryService.UploadImageAsync(stream, file.FileName);
+
+                // Create the image object to store in the database
+                var image = new Image
+                {
+                    Url = imageUrl,
+                    FileName = file.FileName,
+                    UploadedOn = DateTime.UtcNow
+                };
+
+                // Save image URL in the database
+                /*  _context.Images.Add(image);
+                  await _context.SaveChangesAsync();*/
+
+                // Return the URL of the uploaded image
+                return image.Url;
+            }
         }
 
     }
