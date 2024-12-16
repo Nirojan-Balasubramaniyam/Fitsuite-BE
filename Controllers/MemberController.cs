@@ -107,6 +107,22 @@ namespace GYMFeeManagement_System_BE.Controllers
             }
         }
 
+        [HttpGet("check-password/{memberId}")]
+        public async Task<IActionResult> CheckMemberPassword(int memberId)
+        {
+            try
+            {
+                var data = await _memberService.CheckMemberPassword(memberId);
+
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPut("update-password/{memberId}")]
         public async Task<IActionResult> UpdateMemberPassword(int memberId, [FromBody] UpdatePasswordRequest request)
         {

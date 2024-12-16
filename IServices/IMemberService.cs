@@ -9,6 +9,7 @@ namespace GYMFeeManagement_System_BE.IServices
         Task<string> AddMember(MemberReqDTO addMemberReq);
         Task<PaginatedResponse<MemberResDTO>> GetAllMembers(int pageNumber, int pageSize, bool? isActive, int branchId = 0);
         Task<string> Login(string email, string password);
+        Task<Boolean> CheckMemberPassword(int memberId);
         Task<MemberResDTO> GetMemberById(int memberId);
         Task<MemberResDTO> UpdateMember(int memberId, MemberReqDTO updateMemberReq);
         Task DeleteMember(int memberId);

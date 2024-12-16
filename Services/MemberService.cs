@@ -205,20 +205,24 @@ namespace GYMFeeManagement_System_BE.Services
                 existingMember.ImagePath = await UploadImage(updateMemberReq.ImageFile);
             }
 
-            if(updateMemberReq.Password != null && updateMemberReq.Password!="") 
+      /*      if(updateMemberReq.Password != null && updateMemberReq.Password!="") 
             {
                 existingMember.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updateMemberReq.Password);
-            }
+            }*/
 
            
 
-            if (existingMember.Address != null)
+            if (updateMemberReq.Address != null)
             {
-                existingMember.Address.Street = updateMemberReq.Address.Street;
-                existingMember.Address.City = updateMemberReq.Address.City;
-                existingMember.Address.District = updateMemberReq.Address.District;
-                existingMember.Address.Province = updateMemberReq.Address.Province;
-                existingMember.Address.Country = updateMemberReq.Address.Country;
+                existingMember.Address = new Address
+                {
+                    Street = updateMemberReq.Address.Street,
+                    City = updateMemberReq.Address.City,
+                    District = updateMemberReq.Address.District,
+                    Province = updateMemberReq.Address.Province,
+                    Country = updateMemberReq.Address.Country,
+                };
+               
             }
 
             var updatedMember = await _memberRepository.UpdateMember(existingMember);
@@ -252,6 +256,14 @@ namespace GYMFeeManagement_System_BE.Services
             };
 
             return updatedMemberRes;
+        }
+
+        public async Task<Boolean> CheckMemberPassword(int memberId)
+        {
+            var existingMember = await _memberRepository.GetMemberById(memberId);
+            var isChecked = BCrypt.Net.BCrypt.Verify(existingMember.Phone, existingMember.PasswordHash);
+            return isChecked;
+
         }
 
         public async Task<MemberResDTO> UpdateMemberPassword(int memberId, string password)
