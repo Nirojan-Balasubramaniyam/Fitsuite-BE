@@ -20,12 +20,12 @@ namespace GYMFeeManagement_System_BE.Controllers
 
 
         [HttpPost("add-member")]
-        public async Task<IActionResult> AddMemberRequestAsync([FromForm] NeworChangeMemberRequestDTO requestDTO)
+        public async Task<IActionResult> AddMemberRequestAsync([FromForm] NeworChangeMemberRequestDTO requestDTO, DateTime paidDate)
         {
             try
             {
 
-                var data = await _requestService.AddMemberRequestAsync(requestDTO);
+                var data = await _requestService.AddMemberRequestAsync(requestDTO, paidDate);
 
                 return Ok(data);
 

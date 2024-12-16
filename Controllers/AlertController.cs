@@ -97,7 +97,7 @@ namespace GYMFeeManagement_System_BE.Controllers
         }
 
 
-        [HttpPut]
+        [HttpPut("{alertId}")]
         public async Task<IActionResult> UpdateAlert(int alertId, AlertReqDTO alertRequest)
         {
             try

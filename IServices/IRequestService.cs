@@ -11,7 +11,7 @@ namespace GYMFeeManagement_System_BE.IServices
         Task<List<RequestResDTO>> GetAllRequests();
         //Task<PaginatedResponse<Request>> GetRequestByType(string requestType, int pageNumber, int pageSize);
         Task<RequestResDTO> UpdateRequest(int requestId, Request updateRequest);
-        Task<NeworChangeMemberRequestResDTO> AddMemberRequestAsync(NeworChangeMemberRequestDTO requestDTO);
+        Task<NeworChangeMemberRequestResDTO> AddMemberRequestAsync(NeworChangeMemberRequestDTO requestDTO, DateTime paidDate);
         Task<NeworChangeMemberRequestResDTO> ChangeMemberInfoRequestAsync(NeworChangeMemberRequestDTO requestDTO);
         Task<ProgramAddonRequestResDTO> AddProgramAddonRequestAsync(ProgramAddonRequestDTO requestDTO);
         Task<LeaveProgramRequestResDTO> AddLeaveProgramRequestAsync(LeaveProgramRequestDTO requestDTO);
