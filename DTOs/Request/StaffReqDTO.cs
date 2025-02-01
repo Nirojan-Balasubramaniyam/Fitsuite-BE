@@ -15,7 +15,7 @@ namespace GYMFeeManagement_System_BE.DTOs.Request
         public string Gender { get; set; }
         public IFormFile? ImageFile { get; set; }
         public UserRole UserRole { get; set; }
-        public int BranchId { get; set; }
+        public int? BranchId { get; set; }
         public AddressReqDTO Address { get; set; }
     }
 }

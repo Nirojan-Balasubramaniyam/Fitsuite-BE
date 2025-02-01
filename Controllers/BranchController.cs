@@ -21,7 +21,7 @@ namespace GYMFeeManagement_System_BE.Controllers
         {
             try
             {
-                var data = await _branchService.AddBranch(branchRequest, branchRequest.BranchAdminId);
+                    var data = await _branchService.AddBranch(branchRequest, branchRequest.BranchAdminId);
                 return Ok(data);
 
             }
