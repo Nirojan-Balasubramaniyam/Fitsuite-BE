@@ -16,12 +16,15 @@ namespace GYMFeeManagement_System_BE.Services
         private readonly IStaffRepository _staffRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IConfiguration _configuration;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public StaffService(IStaffRepository staffRepository, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+
+        public StaffService(IStaffRepository staffRepository, CloudinaryService cloudinaryService, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _staffRepository = staffRepository;
             _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<PaginatedResponse<StaffResDTO>> GetAllStaffs(int pageNumber, int pageSize, bool isActive)
@@ -231,24 +234,34 @@ namespace GYMFeeManagement_System_BE.Services
             await _staffRepository.DeleteStaff(staffId);
         }
 
-        private async Task<string> SaveImageFileAsync(IFormFile imageFile)
+        private async Task<string> SaveImageFileAsync(IFormFile file)
         {
-            var profileImagesPath = Path.Combine(_webHostEnvironment.WebRootPath, "profileimages");
-
-            if (!Directory.Exists(profileImagesPath))
+            if (file == null || file.Length == 0)
             {
-                Directory.CreateDirectory(profileImagesPath);
+                throw new Exception("No file uploaded.");
             }
 
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            var filePath = Path.Combine(profileImagesPath, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            // Get the file stream and file name
+            using (var stream = file.OpenReadStream())
             {
-                await imageFile.CopyToAsync(stream);
-            }
+                // Upload image to Cloudinary and get the URL
+                var imageUrl = await _cloudinaryService.UploadImageAsync(stream, file.FileName);
 
-            return $"/profileimages/{fileName}";
+                // Create the image object to store in the database
+                var image = new Image
+                {
+                    Url = imageUrl,
+                    FileName = file.FileName,
+                    UploadedOn = DateTime.UtcNow
+                };
+
+                // Save image URL in the database
+                /*  _context.Images.Add(image);
+                  await _context.SaveChangesAsync();*/
+
+                // Return the URL of the uploaded image
+                return image.Url;
+            }
         }
 
         private async Task ValidateEmail(string email, int? staffId = null)
