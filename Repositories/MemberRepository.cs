@@ -112,7 +112,8 @@ namespace GYMFeeManagement_System_BE.Repositories
             // Filter the members based on the 'isActive' parameter if provided
             IQueryable<Member> query = _dbContext.Members
                 .Include(m => m.Address)
-                .Include(m => m.EnrollPrograms);
+                .Include(m => m.EnrollPrograms)
+                .Include(m=>m.workoutPlans);
 
             // If isActive is specified, filter based on the status
             if (isActive.HasValue)
@@ -169,6 +170,7 @@ namespace GYMFeeManagement_System_BE.Repositories
         {
             var member = await _dbContext.Members.Include(m => m.Address)
                                                 .Include(m => m.EnrollPrograms)
+                                                .Include(m=>m.workoutPlans)
                                                 .FirstOrDefaultAsync(m => m.MemberId == memberId);
             if (member == null) throw new Exception("Member Not Found");
             return member;

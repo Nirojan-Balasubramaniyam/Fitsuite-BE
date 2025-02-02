@@ -96,5 +96,11 @@ namespace GYMFeeManagement_System_BE.Repositories
             }
 
         }
+        public async Task<string> UpdateWorkTime(WorkoutPlan plan)
+        {
+             var responsePlan =  _dbContext.WorkoutPlans.Update(plan);
+            await _dbContext.SaveChangesAsync();
+            return "Update SuccesFully";
+        }
     }
 }

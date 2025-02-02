@@ -12,5 +12,7 @@ namespace GYMFeeManagement_System_BE.IServices
         Task<StaffResDTO> UpdateStaff(int staffId, StaffReqDTO updateStaffReq);
         Task<string> Login(string email, string password); 
         Task DeleteStaff(int staffId);
+        Task<Boolean> UpdateStaffPassword(int staffId, string password);
+        Task<Boolean> CheckStaffPassword(int staffId, string password);
     }
 }

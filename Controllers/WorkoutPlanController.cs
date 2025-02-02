@@ -102,5 +102,18 @@ namespace GYMFeeManagement_System_BE.Controllers
             }
 
         }
+
+        [HttpPut("workTime")]
+        public async Task<IActionResult> UpdateWorkOutTime(updateWorkoutplanTime workoutplanTime)
+        {
+            try
+            {
+                var data =await _workoutPlanService.UpdateplanTime(workoutplanTime.workoutPlanId, workoutplanTime.Starting , workoutplanTime.Ending, workoutplanTime.date);
+                return Ok(data);
+            }catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

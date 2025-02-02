@@ -21,5 +21,7 @@ namespace GYMFeeManagement_System_BE.DTOs.Response
         public int BranchId { get; set; }
         public bool IsActive { get; set; }
         public AddressResDTO? Address { get; set; }
+        public ICollection<WorkoutPlanResDTO>? WorkoutPlan { get; set; } = null;
+
     }
 }

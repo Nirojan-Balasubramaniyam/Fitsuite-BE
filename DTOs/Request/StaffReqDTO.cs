@@ -8,7 +8,7 @@ namespace GYMFeeManagement_System_BE.DTOs.Request
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
-        public string Password { get; set; }
+        public string? Password { get; set; }
         public string NIC { get; set; }
         public string Phone { get; set; }
         public DateTime DoB { get; set; }

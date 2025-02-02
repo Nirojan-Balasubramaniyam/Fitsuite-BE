@@ -33,5 +33,6 @@ namespace GYMFeeManagement_System_BE.Entities
         public ICollection<Request> Requests { get; set; }
         public ICollection<WorkoutEnrollment> WorkoutEnrollments { get; set; }
         public ICollection<Review> Reviews { get; set; }
+        public ICollection<WorkoutPlan> workoutPlans{ get; set; }
     }
 }

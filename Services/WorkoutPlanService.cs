@@ -25,7 +25,12 @@ namespace GYMFeeManagement_System_BE.Services
                 Name = workoutPlan.Name,
                 RepsCount = workoutPlan.RepsCount,
                 Weight = workoutPlan.Weight,
-                StaffId = workoutPlan.StaffId
+                StaffId = workoutPlan.StaffId,
+                memberId = workoutPlan.memberId,
+                StartTime = workoutPlan.StartTime,
+                EndTime = workoutPlan.StartTime,
+                Date=workoutPlan.Date
+
             }).ToList();
 
             // Return the paginated response with DTOs
@@ -49,7 +54,12 @@ namespace GYMFeeManagement_System_BE.Services
                 Name = workoutPlan.Name,
                 RepsCount = workoutPlan.RepsCount,
                 Weight = workoutPlan.Weight,
-                StaffId = workoutPlan.StaffId
+                StaffId = workoutPlan.StaffId,
+                memberId = workoutPlan.memberId,
+                StartTime = workoutPlan.StartTime,
+                EndTime= workoutPlan.StartTime,
+                Date = workoutPlan.Date,
+
             };
         }
 
@@ -59,10 +69,12 @@ namespace GYMFeeManagement_System_BE.Services
 
             var workoutPlan = new WorkoutPlan
             {
-               Name = addWorkoutPlanReq.Name,
-               RepsCount = addWorkoutPlanReq.RepsCount,
-               Weight = addWorkoutPlanReq.Weight,
-               StaffId = addWorkoutPlanReq.StaffId
+                Name = addWorkoutPlanReq.Name,
+                RepsCount = addWorkoutPlanReq.RepsCount,
+                Weight = addWorkoutPlanReq.Weight,
+                StaffId = addWorkoutPlanReq.StaffId,
+                memberId = addWorkoutPlanReq.MemberId,
+
             };
 
             var addedWorkoutPlan = await _workoutPlanRepository.AddWorkoutPlan(workoutPlan);
@@ -73,7 +85,9 @@ namespace GYMFeeManagement_System_BE.Services
                 Name = addedWorkoutPlan.Name,
                 RepsCount = addedWorkoutPlan.RepsCount,
                 Weight = addedWorkoutPlan.Weight,
-                StaffId = addedWorkoutPlan.StaffId
+                StaffId = addedWorkoutPlan.StaffId,
+                memberId = workoutPlan.memberId
+
             };
         }
 
@@ -97,7 +111,8 @@ namespace GYMFeeManagement_System_BE.Services
             existingWorkoutPlan.RepsCount = updateWorkoutPlanReq.RepsCount != 0 ? updateWorkoutPlanReq.RepsCount : existingWorkoutPlan.RepsCount;
             existingWorkoutPlan.Weight = updateWorkoutPlanReq.Weight != 0 ? updateWorkoutPlanReq.Weight : existingWorkoutPlan.Weight;
             existingWorkoutPlan.StaffId = updateWorkoutPlanReq.StaffId != 0 ? updateWorkoutPlanReq.StaffId : existingWorkoutPlan.StaffId;
-
+            existingWorkoutPlan.memberId = updateWorkoutPlanReq.MemberId != 0 ? updateWorkoutPlanReq.MemberId : existingWorkoutPlan.memberId;
+         
 
 
             var updatedWorkoutPlan = await _workoutPlanRepository.UpdateWorkoutPlan(existingWorkoutPlan);
@@ -108,7 +123,11 @@ namespace GYMFeeManagement_System_BE.Services
                 Name = updatedWorkoutPlan.Name,
                 RepsCount = updatedWorkoutPlan.RepsCount,
                 Weight = updatedWorkoutPlan.Weight,
-                StaffId = updatedWorkoutPlan.StaffId
+                StaffId = updatedWorkoutPlan.StaffId,
+                memberId = updatedWorkoutPlan.memberId,
+                StartTime = updatedWorkoutPlan.StartTime,
+                EndTime = updatedWorkoutPlan.EndTime,
+                Date = updatedWorkoutPlan.Date,
             };
 
         }
@@ -124,14 +143,29 @@ namespace GYMFeeManagement_System_BE.Services
 
             if (existingWorkoutPlan != null)
             {
-                // If the workoutId is provided and matches the found program's ID, it means no name conflict
                 if (workoutId.HasValue && existingWorkoutPlan.WorkoutPlanId == workoutId.Value)
                 {
                     return;
                 }
 
-                // Otherwise, the name is already taken by another program
                 throw new ArgumentException($"{workoutName} has already registered.");
+            }
+        }
+        public async Task<string> UpdateplanTime(int workoutPlanId, string Starting, string Ending , string date)
+        {
+            var data = await _workoutPlanRepository.GetWorkoutPlanById(workoutPlanId);
+            if (data != null)
+            {
+                data.StartTime= Starting;
+                data.EndTime= Ending;
+                data.Date= date;
+                var responseData = await _workoutPlanRepository.UpdateWorkTime(data);
+                return responseData;
+
+            }
+            else
+            {
+                return "Workout Not Found.";
             }
         }
     }

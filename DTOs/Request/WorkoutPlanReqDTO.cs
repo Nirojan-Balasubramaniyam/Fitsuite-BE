@@ -6,5 +6,8 @@
         public int RepsCount { get; set; }
         public float Weight { get; set; }
         public int StaffId { get; set; }
+        public int MemberId { get; set; }
+      
+
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GYMFeeManagement_System_BE.Migrations
 {
     /// <inheritdoc />
-    public partial class initial1 : Migration
+    public partial class gym : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -69,6 +69,20 @@ namespace GYMFeeManagement_System_BE.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Images", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PaymentDiscounts",
+                columns: table => new
+                {
+                    DiscountId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Discount = table.Column<float>(type: "real", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentDiscounts", x => x.DiscountId);
                 });
 
             migrationBuilder.CreateTable(
@@ -171,28 +185,6 @@ namespace GYMFeeManagement_System_BE.Migrations
                     table.ForeignKey(
                         name: "FK_Members_Staffs_TrainerId",
                         column: x => x.TrainerId,
-                        principalTable: "Staffs",
-                        principalColumn: "StaffId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "WorkoutPlans",
-                columns: table => new
-                {
-                    WorkoutPlanId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RepsCount = table.Column<int>(type: "int", nullable: false),
-                    Weight = table.Column<float>(type: "real", nullable: false),
-                    StaffId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_WorkoutPlans", x => x.WorkoutPlanId);
-                    table.ForeignKey(
-                        name: "FK_WorkoutPlans_Staffs_StaffId",
-                        column: x => x.StaffId,
                         principalTable: "Staffs",
                         principalColumn: "StaffId",
                         onDelete: ReferentialAction.Restrict);
@@ -347,36 +339,34 @@ namespace GYMFeeManagement_System_BE.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "WorkoutEnrollments",
+                name: "WorkoutPlans",
                 columns: table => new
                 {
-                    WorkoutEnrollId = table.Column<int>(type: "int", nullable: false)
+                    WorkoutPlanId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    MemberId = table.Column<int>(type: "int", nullable: false),
-                    EnrollmentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    WorkoutPlanId = table.Column<int>(type: "int", nullable: false),
-                    StaffId = table.Column<int>(type: "int", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RepsCount = table.Column<int>(type: "int", nullable: false),
+                    Weight = table.Column<float>(type: "real", nullable: false),
+                    StaffId = table.Column<int>(type: "int", nullable: false),
+                    memberId = table.Column<int>(type: "int", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WorkoutEnrollments", x => x.WorkoutEnrollId);
+                    table.PrimaryKey("PK_WorkoutPlans", x => x.WorkoutPlanId);
                     table.ForeignKey(
-                        name: "FK_WorkoutEnrollments_Members_MemberId",
-                        column: x => x.MemberId,
+                        name: "FK_WorkoutPlans_Members_memberId",
+                        column: x => x.memberId,
                         principalTable: "Members",
                         principalColumn: "MemberId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_WorkoutEnrollments_Staffs_StaffId",
+                        name: "FK_WorkoutPlans_Staffs_StaffId",
                         column: x => x.StaffId,
                         principalTable: "Staffs",
-                        principalColumn: "StaffId");
-                    table.ForeignKey(
-                        name: "FK_WorkoutEnrollments_WorkoutPlans_WorkoutPlanId",
-                        column: x => x.WorkoutPlanId,
-                        principalTable: "WorkoutPlans",
-                        principalColumn: "WorkoutPlanId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "StaffId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -418,6 +408,39 @@ namespace GYMFeeManagement_System_BE.Migrations
                         column: x => x.StaffId,
                         principalTable: "Staffs",
                         principalColumn: "StaffId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WorkoutEnrollments",
+                columns: table => new
+                {
+                    WorkoutEnrollId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MemberId = table.Column<int>(type: "int", nullable: false),
+                    EnrollmentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    WorkoutPlanId = table.Column<int>(type: "int", nullable: false),
+                    StaffId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WorkoutEnrollments", x => x.WorkoutEnrollId);
+                    table.ForeignKey(
+                        name: "FK_WorkoutEnrollments_Members_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "Members",
+                        principalColumn: "MemberId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_WorkoutEnrollments_Staffs_StaffId",
+                        column: x => x.StaffId,
+                        principalTable: "Staffs",
+                        principalColumn: "StaffId");
+                    table.ForeignKey(
+                        name: "FK_WorkoutEnrollments_WorkoutPlans_WorkoutPlanId",
+                        column: x => x.WorkoutPlanId,
+                        principalTable: "WorkoutPlans",
+                        principalColumn: "WorkoutPlanId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -524,6 +547,11 @@ namespace GYMFeeManagement_System_BE.Migrations
                 column: "WorkoutPlanId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_WorkoutPlans_memberId",
+                table: "WorkoutPlans",
+                column: "memberId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_WorkoutPlans_StaffId",
                 table: "WorkoutPlans",
                 column: "StaffId");
@@ -551,6 +579,9 @@ namespace GYMFeeManagement_System_BE.Migrations
                 name: "Images");
 
             migrationBuilder.DropTable(
+                name: "PaymentDiscounts");
+
+            migrationBuilder.DropTable(
                 name: "Payments");
 
             migrationBuilder.DropTable(
@@ -566,16 +597,16 @@ namespace GYMFeeManagement_System_BE.Migrations
                 name: "WorkoutPlans");
 
             migrationBuilder.DropTable(
-                name: "Members");
-
-            migrationBuilder.DropTable(
                 name: "TrainingPrograms");
 
             migrationBuilder.DropTable(
-                name: "Staffs");
+                name: "Members");
 
             migrationBuilder.DropTable(
                 name: "ProgramTypes");
+
+            migrationBuilder.DropTable(
+                name: "Staffs");
 
             migrationBuilder.DropTable(
                 name: "Branches");

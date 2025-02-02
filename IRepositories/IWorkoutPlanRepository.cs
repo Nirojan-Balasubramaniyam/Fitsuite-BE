@@ -12,5 +12,6 @@ namespace GYMFeeManagement_System_BE.IRepositories
         Task<WorkoutPlan> GetWorkoutPlanByName(string workoutName);
         Task<WorkoutPlan> UpdateWorkoutPlan(WorkoutPlan updateWorkoutPlan);
         Task DeleteWorkoutPlan(int workoutPlanId);
+        Task<string> UpdateWorkTime(WorkoutPlan plan);
     }
 }

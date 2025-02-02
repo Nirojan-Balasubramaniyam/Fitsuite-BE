@@ -11,5 +11,6 @@ namespace GYMFeeManagement_System_BE.IServices
         Task<WorkoutPlanResDTO> AddWorkoutPlan(WorkoutPlanReqDTO addWorkoutPlanReq);
         Task<WorkoutPlanResDTO> UpdateWorkoutPlan(int trainingWorkoutPlanId, WorkoutPlanReqDTO updateWorkoutPlanReq);
         Task DeleteWorkoutPlan(int trainingWorkoutPlanId);
+       Task<string> UpdateplanTime(int workoutPlanId, string Starting, string Ending, string date);
     }
 }

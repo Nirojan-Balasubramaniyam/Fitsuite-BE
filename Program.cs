@@ -116,6 +116,9 @@ namespace GYMFeeManagement_System_BE
             builder.Services.AddScoped<SendMailRepository>();
             builder.Services.AddScoped<EmailServiceProvider>();
 
+            builder.Services.AddScoped<IDiscountRepository, DiscountRepository>();
+            builder.Services.AddScoped<IDiscountService, DiscountService>();
+
 
             // Ensure EmailConfig is available as a singleton if needed
             builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmailConfig>>().Value);

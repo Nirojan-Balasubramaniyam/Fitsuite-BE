@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GYMFeeManagement_System_BE.Migrations
 {
     [DbContext(typeof(GymDbContext))]
-    [Migration("20241215071230_initial1")]
-    partial class initial1
+    [Migration("20250202120412_gym")]
+    partial class gym
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -354,6 +354,26 @@ namespace GYMFeeManagement_System_BE.Migrations
                     b.ToTable("Payments");
                 });
 
+            modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.PaymentDiscount", b =>
+                {
+                    b.Property<int>("DiscountId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DiscountId"));
+
+                    b.Property<float>("Discount")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("DiscountId");
+
+                    b.ToTable("PaymentDiscounts");
+                });
+
             modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.ProgramType", b =>
                 {
                     b.Property<int>("TypeId")
@@ -609,6 +629,9 @@ namespace GYMFeeManagement_System_BE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkoutPlanId"));
 
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -619,12 +642,20 @@ namespace GYMFeeManagement_System_BE.Migrations
                     b.Property<int>("StaffId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("StartTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<float>("Weight")
                         .HasColumnType("real");
+
+                    b.Property<int>("memberId")
+                        .HasColumnType("int");
 
                     b.HasKey("WorkoutPlanId");
 
                     b.HasIndex("StaffId");
+
+                    b.HasIndex("memberId");
 
                     b.ToTable("WorkoutPlans");
                 });
@@ -801,7 +832,15 @@ namespace GYMFeeManagement_System_BE.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("GYMFeeManagement_System_BE.Entities.Member", "member")
+                        .WithMany("workoutPlans")
+                        .HasForeignKey("memberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Staff");
+
+                    b.Navigation("member");
                 });
 
             modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.Branch", b =>
@@ -828,6 +867,8 @@ namespace GYMFeeManagement_System_BE.Migrations
                     b.Navigation("Reviews");
 
                     b.Navigation("WorkoutEnrollments");
+
+                    b.Navigation("workoutPlans");
                 });
 
             modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.ProgramType", b =>

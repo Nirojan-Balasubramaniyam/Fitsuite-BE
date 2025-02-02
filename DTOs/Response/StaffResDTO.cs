@@ -16,5 +16,7 @@ namespace GYMFeeManagement_System_BE.DTOs.Response
         public UserRole UserRole { get; set; }
         public int BranchId { get; set; }
         public AddressResDTO? Address { get; set; }
+
+
     }
 }

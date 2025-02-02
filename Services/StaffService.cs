@@ -16,12 +16,16 @@ namespace GYMFeeManagement_System_BE.Services
         private readonly IStaffRepository _staffRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IConfiguration _configuration;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public StaffService(IStaffRepository staffRepository, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+
+        public StaffService(IStaffRepository staffRepository, CloudinaryService cloudinaryService, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _staffRepository = staffRepository;
             _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
+            _cloudinaryService = cloudinaryService;
+
         }
 
         public async Task<PaginatedResponse<StaffResDTO>> GetAllStaffs(int pageNumber, int pageSize, bool isActive)
@@ -114,6 +118,7 @@ namespace GYMFeeManagement_System_BE.Services
                 DoB = addStaffReq.DoB,
                 Gender = addStaffReq.Gender,  
                 UserRole = addStaffReq.UserRole,
+                IsActive = true,
                 BranchId = addStaffReq.BranchId,
                 Address = new Address
                  {
@@ -127,7 +132,7 @@ namespace GYMFeeManagement_System_BE.Services
 
             if (addStaffReq.ImageFile != null)
             {
-                staff.ImagePath = await SaveImageFileAsync(addStaffReq.ImageFile);
+                staff.ImagePath = await UploadImage(addStaffReq.ImageFile);
             }
 
             var addedStaff = await _staffRepository.AddStaff(staff);
@@ -165,20 +170,24 @@ namespace GYMFeeManagement_System_BE.Services
 
             if (updateStaffReq.ImageFile != null)
             {
-                existingStaff.ImagePath = await SaveImageFileAsync(updateStaffReq.ImageFile);
+                existingStaff.ImagePath = await UploadImage(updateStaffReq.ImageFile);
             }
 
-            existingStaff.PasswordHash = updateStaffReq.Password != null
+           /* existingStaff.PasswordHash = updateStaffReq.Password != null
                 ? BCrypt.Net.BCrypt.HashPassword(updateStaffReq.Password)
-                : existingStaff.PasswordHash;
+                : existingStaff.PasswordHash;*/
 
-            if (existingStaff.Address != null)
+            if (updateStaffReq.Address != null)
             {
-                existingStaff.Address.Street = updateStaffReq.Address.Street;
-                existingStaff.Address.City = updateStaffReq.Address.City;
-                existingStaff.Address.District = updateStaffReq.Address.District;
-                existingStaff.Address.Province = updateStaffReq.Address.Province;
-                existingStaff.Address.Country = updateStaffReq.Address.Country;
+                existingStaff.Address = new Address
+                {
+                    Street = updateStaffReq.Address.Street,
+                    City = updateStaffReq.Address.City,
+                    District = updateStaffReq.Address.District,
+                    Province = updateStaffReq.Address.Province,
+                    Country = updateStaffReq.Address.Country,
+                };
+
             }
 
             var updatedStaff = await _staffRepository.UpdateStaff(existingStaff);
@@ -209,6 +218,41 @@ namespace GYMFeeManagement_System_BE.Services
 
             return updatedStaffRes;
 
+        }
+
+        public async Task<Boolean> CheckStaffPassword(int staffId, string password)
+        {
+            var existingStaff = await _staffRepository.GetStaffById(staffId);
+            var isChecked = BCrypt.Net.BCrypt.Verify(password, existingStaff.PasswordHash);
+            return isChecked;
+
+        }
+
+        public async Task<Boolean> UpdateStaffPassword(int staffId, string password)
+        {
+            var existingStaff = await _staffRepository.GetStaffById(staffId);
+            if (existingStaff == null)
+            {
+                throw new Exception("Staff id is invalid");
+            }
+
+
+
+
+            existingStaff.PasswordHash = password != null
+                ? BCrypt.Net.BCrypt.HashPassword(password)
+                : existingStaff.PasswordHash;
+
+            var updatedMember = await _staffRepository.UpdateStaff(existingStaff);
+            if(updatedMember == null)
+            {
+                return false;
+            }
+
+            return true;
+
+
+            
         }
 
 
@@ -293,6 +337,36 @@ namespace GYMFeeManagement_System_BE.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
 
 
+        }
+
+        public async Task<string> UploadImage(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                throw new Exception("No file uploaded.");
+            }
+
+            // Get the file stream and file name
+            using (var stream = file.OpenReadStream())
+            {
+                // Upload image to Cloudinary and get the URL
+                var imageUrl = await _cloudinaryService.UploadImageAsync(stream, file.FileName);
+
+                // Create the image object to store in the database
+                var image = new Image
+                {
+                    Url = imageUrl,
+                    FileName = file.FileName,
+                    UploadedOn = DateTime.UtcNow
+                };
+
+                // Save image URL in the database
+                /*  _context.Images.Add(image);
+                  await _context.SaveChangesAsync();*/
+
+                // Return the URL of the uploaded image
+                return image.Url;
+            }
         }
     }
 }

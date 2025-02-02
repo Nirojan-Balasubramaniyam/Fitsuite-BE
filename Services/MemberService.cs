@@ -20,14 +20,16 @@ namespace GYMFeeManagement_System_BE.Services
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IConfiguration _configuration;
         private readonly CloudinaryService _cloudinaryService;
+        private readonly IPaymentService _paymentService;
 
-        public MemberService(IMemberRepository memberRepository, CloudinaryService cloudinaryService,ITrainingProgramRepository trainingProgramRepository ,IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+        public MemberService(IMemberRepository memberRepository, IPaymentService paymentService, CloudinaryService cloudinaryService,ITrainingProgramRepository trainingProgramRepository ,IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _memberRepository = memberRepository;
             _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
             _cloudinaryService = cloudinaryService;
             _trainingProgramRepository = trainingProgramRepository;
+            _paymentService = paymentService;
 
         }
 
@@ -52,7 +54,6 @@ namespace GYMFeeManagement_System_BE.Services
                 Bmi = member.Bmi,
                 ImagePath = member.ImagePath,
                 TrainerId = member.TrainerId,
-               
                 BranchId = member.BranchId,
                 Address = member.Address != null ? new AddressResDTO
                 {
@@ -64,11 +65,23 @@ namespace GYMFeeManagement_System_BE.Services
                     Country = member.Address.Country
                 } : null,
                 IsActive = member.IsActive,
-                // Calculate total training cost for the member from EnrollPrograms and their TrainingProgram's cost
                 MonthlyPayment = member.EnrollPrograms?.Sum(ep =>
-                        allPrograms.FirstOrDefault(p => p.ProgramId == ep.ProgramId)?.Cost ?? 0) ?? 0
+                        allPrograms.FirstOrDefault(p => p.ProgramId == ep.ProgramId)?.Cost ?? 0) ?? 0,
 
-                 }).ToList();
+                // Mapping WorkoutPlanResDTO
+                WorkoutPlan = member.workoutPlans?.Select(wp => new WorkoutPlanResDTO
+                {
+                    WorkoutPlanId = wp.WorkoutPlanId,
+                    Name = wp.Name,
+                    RepsCount = wp.RepsCount,
+                    Weight = wp.Weight,
+                    StaffId = wp.StaffId,
+                    memberId = wp.memberId,
+                    StartTime=wp.StartTime,
+                    EndTime=wp.EndTime,
+                    Date=wp.Date
+                }).ToList() ?? new List<WorkoutPlanResDTO>()
+            }).ToList();
 
             return new PaginatedResponse<MemberResDTO>
             {
@@ -79,12 +92,17 @@ namespace GYMFeeManagement_System_BE.Services
             };
         }
 
-        public async Task<MemberResDTO> GetMemberById(int memberId)
+        public async Task<ICollection<MemberResDTO>> GetMemberById(int memberId)
         {
             var member = await _memberRepository.GetMemberById(memberId);
 
             var allPrograms = await _trainingProgramRepository.GetAllPrograms();
 
+            // If member is null, return an empty collection or handle as needed
+            if (member == null)
+            {
+                return new List<MemberResDTO>();
+            }
 
             var memberRes = new MemberResDTO
             {
@@ -98,7 +116,7 @@ namespace GYMFeeManagement_System_BE.Services
                 Gender = member.Gender,
                 EmergencyContactName = member.EmergencyContactName,
                 EmergencyContactNumber = member.EmergencyContactNumber,
-                Bmi = member.Bmi,   
+                Bmi = member.Bmi,
                 ImagePath = member.ImagePath,
                 TrainerId = member.TrainerId,
                 Address = member.Address != null ? new AddressResDTO
@@ -113,11 +131,23 @@ namespace GYMFeeManagement_System_BE.Services
                 IsActive = member.IsActive,
                 // Calculate total training cost for the member from EnrollPrograms and their TrainingProgram's cost
                 MonthlyPayment = member.EnrollPrograms?.Sum(ep =>
-                        allPrograms.FirstOrDefault(p => p.ProgramId == ep.ProgramId)?.Cost ?? 0) ?? 0
+                    allPrograms.FirstOrDefault(p => p.ProgramId == ep.ProgramId)?.Cost ?? 0) ?? 0,
+
+                WorkoutPlan = member.workoutPlans?.Select(wp => new WorkoutPlanResDTO
+                {
+                    WorkoutPlanId = wp.WorkoutPlanId,
+                    Name = wp.Name,
+                    RepsCount = wp.RepsCount,
+                    Weight = wp.Weight,
+                    StaffId = wp.StaffId,
+                    memberId = wp.memberId
+                }).ToList() ?? new List<WorkoutPlanResDTO>()
             };
 
-            return memberRes;
+            // Wrap the memberRes in a list and return
+            return new List<MemberResDTO> { memberRes };
         }
+
 
         public async Task<string> AddMember(MemberReqDTO addMemberReq)
         {
@@ -142,7 +172,7 @@ namespace GYMFeeManagement_System_BE.Services
                 Gender = addMemberReq.Gender,
                 EmergencyContactName = addMemberReq.EmergencyContactName,
                 EmergencyContactNumber = addMemberReq.EmergencyContactNumber,
-                TrainerId = addMemberReq.StaffId,
+                TrainerId = addMemberReq.StaffId, 
                 BranchId = addMemberReq.BranchId,
                 
                 Address = new Address
@@ -162,6 +192,19 @@ namespace GYMFeeManagement_System_BE.Services
             }
 
             var addedMember = await _memberRepository.AddMember(member);
+
+            var newPayment = new PaymentReqDTO
+            {
+                Amount = 2500,
+                MemberId = addedMember.MemberId,
+                PaymentType = "Initial",
+                PaymentMethod = "Cash",
+                PaidDate = DateTime.Now,
+
+            };
+
+            var addedPayment = await _paymentService.AddPayment(newPayment);
+
 
             var token = CreateToken(addedMember);
             return token;

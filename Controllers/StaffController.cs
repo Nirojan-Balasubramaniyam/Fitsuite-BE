@@ -1,5 +1,6 @@
 ﻿using GYMFeeManagement_System_BE.DTOs.Request;
 using GYMFeeManagement_System_BE.IServices;
+using GYMFeeManagement_System_BE.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -72,6 +73,38 @@ namespace GYMFeeManagement_System_BE.Controllers
             try
             {
                 var data = await _staffService.GetAllStaffs(pageNumber, pageSize, isActive);
+
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("check-password/{staffId}")]
+        public async Task<IActionResult> CheckMemberPassword(int staffId, string password)
+        {
+            try
+            {
+                var data = await _staffService.CheckStaffPassword(staffId, password);
+
+                return Ok(data);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("update-password/{staffId}")]
+        public async Task<IActionResult> UpdateStaffPassword(int staffId, string password)
+        {
+            try
+            {
+                var data = await _staffService.UpdateStaffPassword(staffId,password);
 
                 return Ok(data);
 
