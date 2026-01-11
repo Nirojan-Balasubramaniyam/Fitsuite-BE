@@ -36,7 +36,13 @@ namespace GYMFeeManagement_System_BE.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                // Return more detailed error information including inner exception
+                var errorMessage = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $" Inner Exception: {ex.InnerException.Message}";
+                }
+                return BadRequest(new { message = errorMessage, error = ex.ToString() });
             }
 
         }

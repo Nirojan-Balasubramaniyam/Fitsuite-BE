@@ -25,10 +25,7 @@ namespace GYMFeeManagement_System_BE.Repositories
         public async Task<ICollection<TrainingProgram>> GetAllPrograms()
         {
             var trainingProgramList = await _dbContext.TrainingPrograms.Include(tp => tp.ProgramType).ToListAsync();
-            if (trainingProgramList.Count == 0)
-            {
-                throw new Exception("TrainingPrograms not Found");
-            }
+            // Return empty list instead of throwing exception when no programs found
             return trainingProgramList;
         }
         public async Task<PaginatedResponse<TrainingProgram>> GetAllPrograms(int pageNumber, int pageSize)
@@ -38,9 +35,17 @@ namespace GYMFeeManagement_System_BE.Repositories
             pageSize = pageSize <= 0 ? 10 : pageSize;
 
             var totalRecords = await _dbContext.TrainingPrograms.CountAsync(); // Total records for pagination
+            
+            // Return empty list instead of throwing exception when no programs found
             if (totalRecords == 0)
             {
-                throw new Exception("TrainingPrograms not Found");
+                return new PaginatedResponse<TrainingProgram>
+                {
+                    TotalRecords = 0,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Data = new List<TrainingProgram>()
+                };
             }
 
             var trainingProgramList = await _dbContext.TrainingPrograms

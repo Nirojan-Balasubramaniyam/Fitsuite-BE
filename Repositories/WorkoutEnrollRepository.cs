@@ -25,10 +25,7 @@ namespace GYMFeeManagement_System_BE.Repositories
         public async Task<ICollection<WorkoutEnrollment>> GetAllWorkoutEnrollments()
         {
             var workouteEnrollList = await _dbContext.WorkoutEnrollments.ToListAsync();
-            if (workouteEnrollList.Count == 0)
-            {
-                throw new Exception("WorkoutEnrollments not Found");
-            }
+            // Return empty list instead of throwing exception when no workout enrollments found
             return workouteEnrollList;
         }
         public async Task<PaginatedResponse<WorkoutEnrollment>> GetAllWorkoutEnrollments(int pageNumber, int pageSize)
@@ -38,9 +35,17 @@ namespace GYMFeeManagement_System_BE.Repositories
             pageSize = pageSize <= 0 ? 10 : pageSize;
 
             var totalRecords = await _dbContext.WorkoutEnrollments.CountAsync(); // Total records for pagination
+            
+            // Return empty list instead of throwing exception when no workout enrollments found
             if (totalRecords == 0)
             {
-                throw new Exception("WorkoutEnrollments not Found");
+                return new PaginatedResponse<WorkoutEnrollment>
+                {
+                    TotalRecords = 0,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Data = new List<WorkoutEnrollment>()
+                };
             }
 
             var workouteEnrollList = await _dbContext.WorkoutEnrollments
@@ -73,8 +78,7 @@ namespace GYMFeeManagement_System_BE.Repositories
                                                              .Where(w => w.MemberId == memberId)
                                                              .ToListAsync();
 
-            if (workoutEnrollList == null) throw new Exception("WorkoutEnrollments Not Found");
-
+            // Return empty list instead of throwing exception when no workout enrollments found
             return workoutEnrollList;
         }
 
@@ -85,8 +89,7 @@ namespace GYMFeeManagement_System_BE.Repositories
                             .Select(we => we.WorkoutPlan)
                             .ToListAsync();
 
-            if (workoutEnrollList == null) throw new Exception("WorkoutEnrollments Not Found");
-
+            // Return empty list instead of throwing exception when no workout plans found
             return workoutEnrollList;
 
         }

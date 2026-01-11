@@ -86,9 +86,16 @@ namespace GYMFeeManagement_System_BE.Repositories
 
             var totalRecords = await query.CountAsync();
 
+            // Return empty list instead of throwing exception when no requests found
             if (totalRecords == 0)
             {
-                throw new Exception("Requests not Found!");
+                return new PaginatedResponse<Request>
+                {
+                    TotalRecords = 0,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Data = new List<Request>()
+                };
             }
 
             var requests = await query
@@ -112,12 +119,8 @@ namespace GYMFeeManagement_System_BE.Repositories
         public async Task<List<Request>> GetAllRequests()
         {
             var requests = await _dbContext.Requests.Include(r => r.Address).ToListAsync();
-            if (requests.Count == 0)
-            {
-                throw new Exception("Requests not Found!");
-            }
+            // Return empty list instead of throwing exception when no requests found
             return requests;
-
         }
 
         public async Task<Request> AddRequest(Request request)

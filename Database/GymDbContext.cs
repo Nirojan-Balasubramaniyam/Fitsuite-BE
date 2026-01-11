@@ -160,6 +160,15 @@ namespace GYMFeeManagement_System_BE.Database
                 .Property(a => a.Cost)
                 .HasPrecision(8, 2);
 
+            // Explicitly configure Address entity to ensure nullable properties are handled correctly
+            modelBuilder.Entity<Address>()
+                .Property(a => a.District)
+                .IsRequired(false);
+            
+            modelBuilder.Entity<Address>()
+                .Property(a => a.Province)
+                .IsRequired(false);
+
             base.OnModelCreating(modelBuilder);
         }
 

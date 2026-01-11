@@ -43,9 +43,16 @@ namespace GYMFeeManagement_System_BE.Repositories
 
             var totalRecords = await query.CountAsync();
 
+            // Return empty list instead of throwing exception when no payments found
             if (totalRecords == 0)
             {
-                throw new Exception("Payments not Found");
+                return new PaginatedResponse<Payment>
+                {
+                    TotalRecords = 0,
+                    PageNumber = isPaginationApplied ? pageNumber.Value : 1,
+                    PageSize = isPaginationApplied ? pageSize.Value : 0,
+                    Data = new List<Payment>()
+                };
             }
 
             List<Payment> paymentList;

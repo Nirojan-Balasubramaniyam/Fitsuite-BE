@@ -30,10 +30,7 @@ namespace GYMFeeManagement_System_BE.Repositories
             var memberAlerts = await _dbContext.Alerts
                 .Where(a => a.MemberId == memberId && a.Status == true)
                 .ToListAsync();
-            if (memberAlerts == null)
-            {
-                throw new Exception("Alerts not Found!");
-            }
+            // Return empty list instead of throwing exception when no alerts found
             return memberAlerts;
 
         }
@@ -69,10 +66,7 @@ namespace GYMFeeManagement_System_BE.Repositories
         public async Task<List<Alert>> GetAllAlerts()
         {
             var alerts = await _dbContext.Alerts.ToListAsync();
-            if (alerts.Count == 0)
-            {
-                throw new Exception("Alerts not Found!");
-            }
+            // Return empty list instead of throwing exception when no alerts found
             return alerts;
 
         }

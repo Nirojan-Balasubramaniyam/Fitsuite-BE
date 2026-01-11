@@ -25,10 +25,7 @@ namespace GYMFeeManagement_System_BE.Repositories
         public async Task<ICollection<WorkoutPlan>> GetAllWorkoutPlans()
         {
             var workoutPlanList = await _dbContext.WorkoutPlans.ToListAsync();
-            if (workoutPlanList.Count == 0)
-            {
-                throw new Exception("WorkoutPlans not Found");
-            }
+            // Return empty list instead of throwing exception when no workout plans found
             return workoutPlanList;
         }
         public async Task<PaginatedResponse<WorkoutPlan>> GetAllWorkoutPlans(int pageNumber, int pageSize)
@@ -38,9 +35,17 @@ namespace GYMFeeManagement_System_BE.Repositories
             pageSize = pageSize <= 0 ? 10 : pageSize;
 
             var totalRecords = await _dbContext.WorkoutPlans.CountAsync(); // Total records for pagination
+            
+            // Return empty list instead of throwing exception when no workout plans found
             if (totalRecords == 0)
             {
-                throw new Exception("WorkoutPlans not Found");
+                return new PaginatedResponse<WorkoutPlan>
+                {
+                    TotalRecords = 0,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Data = new List<WorkoutPlan>()
+                };
             }
 
             var workoutPlanList = await _dbContext.WorkoutPlans

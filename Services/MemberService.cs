@@ -17,17 +17,19 @@ namespace GYMFeeManagement_System_BE.Services
     {
         private readonly IMemberRepository _memberRepository;
         private readonly ITrainingProgramRepository _trainingProgramRepository;
+        private readonly IBranchRepository _branchRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IConfiguration _configuration;
         private readonly CloudinaryService _cloudinaryService;
 
-        public MemberService(IMemberRepository memberRepository, CloudinaryService cloudinaryService,ITrainingProgramRepository trainingProgramRepository ,IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+        public MemberService(IMemberRepository memberRepository, CloudinaryService cloudinaryService, ITrainingProgramRepository trainingProgramRepository, IBranchRepository branchRepository, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _memberRepository = memberRepository;
             _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
             _cloudinaryService = cloudinaryService;
             _trainingProgramRepository = trainingProgramRepository;
+            _branchRepository = branchRepository;
 
         }
 
@@ -130,6 +132,43 @@ namespace GYMFeeManagement_System_BE.Services
             // Validate the email format and uniqueness
             await ValidateEmail(addMemberReq.Email);
 
+            // Validate BranchId exists
+            if (addMemberReq.BranchId > 0)
+            {
+                try
+                {
+                    await _branchRepository.GetBranchById(addMemberReq.BranchId);
+                }
+                catch (Exception)
+                {
+                    throw new ArgumentException($"Branch with ID {addMemberReq.BranchId} does not exist. Please provide a valid BranchId.");
+                }
+            }
+            else
+            {
+                throw new ArgumentException("BranchId is required and must be greater than 0.");
+            }
+
+            // Validate and prepare address
+            if (addMemberReq.Address == null)
+            {
+                throw new ArgumentException("Address is required.");
+            }
+
+            // Validate required address fields
+            if (string.IsNullOrWhiteSpace(addMemberReq.Address.Street))
+            {
+                throw new ArgumentException("Street is required.");
+            }
+            if (string.IsNullOrWhiteSpace(addMemberReq.Address.City))
+            {
+                throw new ArgumentException("City is required.");
+            }
+            if (string.IsNullOrWhiteSpace(addMemberReq.Address.Country))
+            {
+                throw new ArgumentException("Country is required.");
+            }
+
             var member = new Member
             {
                 FirstName = addMemberReq.FirstName,
@@ -147,11 +186,12 @@ namespace GYMFeeManagement_System_BE.Services
                 
                 Address = new Address
                 {
-                    Street = addMemberReq.Address.Street,
-                    City = addMemberReq.Address.City,
-                    District = addMemberReq.Address.District,
-                    Province = addMemberReq.Address.Province,
-                    Country = addMemberReq.Address.Country,
+                    Street = addMemberReq.Address.Street.Trim(),
+                    City = addMemberReq.Address.City.Trim(),
+                    // Convert empty strings to null for nullable fields
+                    District = string.IsNullOrWhiteSpace(addMemberReq.Address.District) ? null : addMemberReq.Address.District.Trim(),
+                    Province = string.IsNullOrWhiteSpace(addMemberReq.Address.Province) ? null : addMemberReq.Address.Province.Trim(),
+                    Country = addMemberReq.Address.Country.Trim(),
                 },
                 IsActive = true
             };
@@ -183,6 +223,19 @@ namespace GYMFeeManagement_System_BE.Services
                 await ValidateEmail(updateMemberReq.Email, memberId);
             }
 
+            // Validate BranchId exists if being updated
+            if (updateMemberReq.BranchId != 0 && updateMemberReq.BranchId != existingMember.BranchId)
+            {
+                try
+                {
+                    await _branchRepository.GetBranchById(updateMemberReq.BranchId);
+                }
+                catch (Exception)
+                {
+                    throw new ArgumentException($"Branch with ID {updateMemberReq.BranchId} does not exist. Please provide a valid BranchId.");
+                }
+            }
+
             existingMember.FirstName = updateMemberReq.FirstName ?? existingMember.FirstName;
             existingMember.LastName = updateMemberReq.LastName ?? existingMember.LastName;
             existingMember.Email = updateMemberReq.Email ?? existingMember.Email;
@@ -209,13 +262,32 @@ namespace GYMFeeManagement_System_BE.Services
                 ? BCrypt.Net.BCrypt.HashPassword(updateMemberReq.Password)
                 : existingMember.PasswordHash;
 
-            if (existingMember.Address != null)
+            if (updateMemberReq.Address != null)
             {
-                existingMember.Address.Street = updateMemberReq.Address.Street;
-                existingMember.Address.City = updateMemberReq.Address.City;
-                existingMember.Address.District = updateMemberReq.Address.District;
-                existingMember.Address.Province = updateMemberReq.Address.Province;
-                existingMember.Address.Country = updateMemberReq.Address.Country;
+                if (existingMember.Address == null)
+                {
+                    existingMember.Address = new Address();
+                }
+                
+                if (!string.IsNullOrWhiteSpace(updateMemberReq.Address.Street))
+                {
+                    existingMember.Address.Street = updateMemberReq.Address.Street.Trim();
+                }
+                if (!string.IsNullOrWhiteSpace(updateMemberReq.Address.City))
+                {
+                    existingMember.Address.City = updateMemberReq.Address.City.Trim();
+                }
+                if (!string.IsNullOrWhiteSpace(updateMemberReq.Address.Country))
+                {
+                    existingMember.Address.Country = updateMemberReq.Address.Country.Trim();
+                }
+                // Convert empty strings to null for nullable fields
+                existingMember.Address.District = string.IsNullOrWhiteSpace(updateMemberReq.Address.District) 
+                    ? null 
+                    : updateMemberReq.Address.District.Trim();
+                existingMember.Address.Province = string.IsNullOrWhiteSpace(updateMemberReq.Address.Province) 
+                    ? null 
+                    : updateMemberReq.Address.Province.Trim();
             }
 
             var updatedMember = await _memberRepository.UpdateMember(existingMember);

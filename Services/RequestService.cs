@@ -50,11 +50,12 @@ namespace GYMFeeManagement_System_BE.Services
                 Password = requestDTO.Password,
                 Address = requestDTO.Address != null ? new Address
                 {
-                    Street = requestDTO.Address.Street,
-                    City = requestDTO.Address.City,
-                    District = requestDTO.Address.District,
-                    Province = requestDTO.Address.Province,
-                    Country = requestDTO.Address.Country,
+                    Street = !string.IsNullOrWhiteSpace(requestDTO.Address.Street) ? requestDTO.Address.Street.Trim() : null,
+                    City = !string.IsNullOrWhiteSpace(requestDTO.Address.City) ? requestDTO.Address.City.Trim() : null,
+                    // Convert empty strings to null for nullable fields
+                    District = string.IsNullOrWhiteSpace(requestDTO.Address.District) ? null : requestDTO.Address.District.Trim(),
+                    Province = string.IsNullOrWhiteSpace(requestDTO.Address.Province) ? null : requestDTO.Address.Province.Trim(),
+                    Country = !string.IsNullOrWhiteSpace(requestDTO.Address.Country) ? requestDTO.Address.Country.Trim() : null,
                 } : null,
                 Status = "pending"
             };

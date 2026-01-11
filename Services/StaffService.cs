@@ -14,12 +14,14 @@ namespace GYMFeeManagement_System_BE.Services
     public class StaffService : IStaffService
     {
         private readonly IStaffRepository _staffRepository;
+        private readonly IBranchRepository _branchRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IConfiguration _configuration;
 
-        public StaffService(IStaffRepository staffRepository, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
+        public StaffService(IStaffRepository staffRepository, IBranchRepository branchRepository, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _staffRepository = staffRepository;
+            _branchRepository = branchRepository;
             _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
         }
@@ -103,6 +105,39 @@ namespace GYMFeeManagement_System_BE.Services
             // Validate the email format and uniqueness
             await ValidateEmail(addStaffReq.Email);
 
+            // Validate BranchId exists if provided
+            if (addStaffReq.BranchId > 0)
+            {
+                try
+                {
+                    await _branchRepository.GetBranchById(addStaffReq.BranchId);
+                }
+                catch (Exception)
+                {
+                    throw new ArgumentException($"Branch with ID {addStaffReq.BranchId} does not exist. Please provide a valid BranchId.");
+                }
+            }
+
+            // Validate and prepare address
+            if (addStaffReq.Address == null)
+            {
+                throw new ArgumentException("Address is required.");
+            }
+
+            // Validate required address fields
+            if (string.IsNullOrWhiteSpace(addStaffReq.Address.Street))
+            {
+                throw new ArgumentException("Street is required.");
+            }
+            if (string.IsNullOrWhiteSpace(addStaffReq.Address.City))
+            {
+                throw new ArgumentException("City is required.");
+            }
+            if (string.IsNullOrWhiteSpace(addStaffReq.Address.Country))
+            {
+                throw new ArgumentException("Country is required.");
+            }
+
             var staff = new Staff
             {
                 FirstName = addStaffReq.FirstName,
@@ -114,14 +149,16 @@ namespace GYMFeeManagement_System_BE.Services
                 DoB = addStaffReq.DoB,
                 Gender = addStaffReq.Gender,  
                 UserRole = addStaffReq.UserRole,
-                BranchId = addStaffReq.BranchId,
+                BranchId = addStaffReq.BranchId > 0 ? addStaffReq.BranchId : null,
+                IsActive = true,
                 Address = new Address
                  {
-                     Street = addStaffReq.Address.Street,
-                     City = addStaffReq.Address.City,
-                     District = addStaffReq.Address.District,
-                     Province = addStaffReq.Address.Province,
-                     Country = addStaffReq.Address.Country,
+                     Street = addStaffReq.Address.Street.Trim(),
+                     City = addStaffReq.Address.City.Trim(),
+                     // Convert empty strings to null for nullable fields
+                     District = string.IsNullOrWhiteSpace(addStaffReq.Address.District) ? null : addStaffReq.Address.District.Trim(),
+                     Province = string.IsNullOrWhiteSpace(addStaffReq.Address.Province) ? null : addStaffReq.Address.Province.Trim(),
+                     Country = addStaffReq.Address.Country.Trim(),
                  }
             };
 
@@ -152,6 +189,19 @@ namespace GYMFeeManagement_System_BE.Services
                 await ValidateEmail(updateStaffReq.Email, staffId);
             }
 
+            // Validate BranchId exists if being updated
+            if (updateStaffReq.BranchId != 0 && updateStaffReq.BranchId != existingStaff.BranchId)
+            {
+                try
+                {
+                    await _branchRepository.GetBranchById(updateStaffReq.BranchId);
+                }
+                catch (Exception)
+                {
+                    throw new ArgumentException($"Branch with ID {updateStaffReq.BranchId} does not exist. Please provide a valid BranchId.");
+                }
+            }
+
             existingStaff.FirstName = updateStaffReq.FirstName ?? existingStaff.FirstName;
             existingStaff.LastName = updateStaffReq.LastName ?? existingStaff.LastName;
             existingStaff.Email = updateStaffReq.Email ?? existingStaff.Email;
@@ -172,13 +222,32 @@ namespace GYMFeeManagement_System_BE.Services
                 ? BCrypt.Net.BCrypt.HashPassword(updateStaffReq.Password)
                 : existingStaff.PasswordHash;
 
-            if (existingStaff.Address != null)
+            if (updateStaffReq.Address != null)
             {
-                existingStaff.Address.Street = updateStaffReq.Address.Street;
-                existingStaff.Address.City = updateStaffReq.Address.City;
-                existingStaff.Address.District = updateStaffReq.Address.District;
-                existingStaff.Address.Province = updateStaffReq.Address.Province;
-                existingStaff.Address.Country = updateStaffReq.Address.Country;
+                if (existingStaff.Address == null)
+                {
+                    existingStaff.Address = new Address();
+                }
+                
+                if (!string.IsNullOrWhiteSpace(updateStaffReq.Address.Street))
+                {
+                    existingStaff.Address.Street = updateStaffReq.Address.Street.Trim();
+                }
+                if (!string.IsNullOrWhiteSpace(updateStaffReq.Address.City))
+                {
+                    existingStaff.Address.City = updateStaffReq.Address.City.Trim();
+                }
+                if (!string.IsNullOrWhiteSpace(updateStaffReq.Address.Country))
+                {
+                    existingStaff.Address.Country = updateStaffReq.Address.Country.Trim();
+                }
+                // Convert empty strings to null for nullable fields
+                existingStaff.Address.District = string.IsNullOrWhiteSpace(updateStaffReq.Address.District) 
+                    ? null 
+                    : updateStaffReq.Address.District.Trim();
+                existingStaff.Address.Province = string.IsNullOrWhiteSpace(updateStaffReq.Address.Province) 
+                    ? null 
+                    : updateStaffReq.Address.Province.Trim();
             }
 
             var updatedStaff = await _staffRepository.UpdateStaff(existingStaff);

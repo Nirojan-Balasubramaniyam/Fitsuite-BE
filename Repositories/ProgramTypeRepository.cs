@@ -28,10 +28,7 @@ namespace GYMFeeManagement_System_BE.Repositories
         public async Task<List<ProgramType>> GetAllProgramTypes()
         {
             var programTypes = await _dbContext.ProgramTypes.ToListAsync();
-            if (programTypes.Count == 0)
-            {
-                throw new Exception("ProgramTypes not Found!");
-            }
+            // Return empty list instead of throwing exception when no program types found
             return programTypes;
 
         }

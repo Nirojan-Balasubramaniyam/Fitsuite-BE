@@ -22,9 +22,17 @@ namespace GYMFeeManagement_System_BE.Repositories
             pageSize = pageSize <= 0 ? 10 : pageSize;
 
             var totalRecords = await _dbContext.ContactUsMessages.CountAsync(); // Total records for pagination
+            
+            // Return empty list instead of throwing exception when no messages found
             if (totalRecords == 0)
             {
-                throw new Exception("ContactUsMessages not Found");
+                return new PaginatedResponse<ContactUsMessage>
+                {
+                    TotalRecords = 0,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Data = new List<ContactUsMessage>()
+                };
             }
 
             var contactUsMessageList = await _dbContext.ContactUsMessages

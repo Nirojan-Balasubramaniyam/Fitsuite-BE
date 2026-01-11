@@ -100,43 +100,77 @@ namespace GYMFeeManagement_System_BE.Services
 
         public async Task<BranchResDTO> AddBranch(BranchReqDTO branchRequest, int adminStaffId)
         {
-
-            var adminAssigned = await _staffRepository.AdminIsAssignedToAnotherBranchAsync(adminStaffId);
-
-            if (adminAssigned)
+            // Validate and prepare address
+            if (branchRequest.Address == null)
             {
-                // Admin is already assigned to another branch
-                throw new Exception("The selected Admin already assigned to a Branch!!");
+                throw new ArgumentException("Address is required.");
             }
 
+            // Validate required address fields
+            if (string.IsNullOrWhiteSpace(branchRequest.Address.Street))
+            {
+                throw new ArgumentException("Street is required.");
+            }
+            if (string.IsNullOrWhiteSpace(branchRequest.Address.City))
+            {
+                throw new ArgumentException("City is required.");
+            }
+            if (string.IsNullOrWhiteSpace(branchRequest.Address.Country))
+            {
+                throw new ArgumentException("Country is required.");
+            }
+
+            // Only validate and assign admin if adminStaffId is provided (greater than 0)
+            if (adminStaffId > 0)
+            {
+                var adminAssigned = await _staffRepository.AdminIsAssignedToAnotherBranchAsync(adminStaffId);
+
+                if (adminAssigned)
+                {
+                    // Admin is already assigned to another branch
+                    throw new Exception("The selected Admin already assigned to a Branch!!");
+                }
+            }
 
             var branch = new Branch
             {
                 BranchName = branchRequest.BranchName,
                 Address = new Address
                 {
-                    Street = branchRequest.Address.Street,
-                    City = branchRequest.Address.City,
-                    District = branchRequest.Address.District,
-                    Province = branchRequest.Address.Province,
-                    Country = branchRequest.Address.Country,
+                    Street = branchRequest.Address.Street.Trim(),
+                    City = branchRequest.Address.City.Trim(),
+                    // Convert empty strings to null for nullable fields
+                    District = string.IsNullOrWhiteSpace(branchRequest.Address.District) ? null : branchRequest.Address.District.Trim(),
+                    Province = string.IsNullOrWhiteSpace(branchRequest.Address.Province) ? null : branchRequest.Address.Province.Trim(),
+                    Country = branchRequest.Address.Country.Trim(),
                 },
                 IsActive = true
             };
             var addedBranch = await _branchRepository.AddBranch(branch);
 
-            var admin = await _staffRepository.GetStaffById(adminStaffId);
-            if (admin != null)
+            // Only assign admin if adminStaffId is provided (greater than 0)
+            if (adminStaffId > 0)
             {
-                admin.BranchId = addedBranch.BranchId;  // Assign admin to the new branch
-                await _staffRepository.UpdateStaff(admin);
+                try
+                {
+                    var admin = await _staffRepository.GetStaffById(adminStaffId);
+                    if (admin != null)
+                    {
+                        admin.BranchId = addedBranch.BranchId;  // Assign admin to the new branch
+                        await _staffRepository.UpdateStaff(admin);
+                    }
+                }
+                catch (Exception)
+                {
+                    throw new Exception($"Staff with ID {adminStaffId} not found. Please provide a valid BranchAdminId or set it to 0 to create a branch without an admin.");
+                }
             }
 
             var branchResDTO = new BranchResDTO
             {
                 BranchId = addedBranch.BranchId,
                 BranchName = addedBranch.BranchName,
-                BranchAdminId = adminStaffId,
+                BranchAdminId = adminStaffId > 0 ? adminStaffId : 0,
                 Address = addedBranch.Address != null ? new AddressResDTO
                 {
                     AddressId = addedBranch.Address.AddressId,
@@ -162,13 +196,32 @@ namespace GYMFeeManagement_System_BE.Services
                 throw new Exception("Branch id is invalid");
             }
             existingBranch.BranchName = branchRequest.BranchName;
-            if (existingBranch.Address != null)
+            if (branchRequest.Address != null)
             {
-                existingBranch.Address.Street = branchRequest.Address.Street;
-                existingBranch.Address.City = branchRequest.Address.City;
-                existingBranch.Address.District = branchRequest.Address.District;
-                existingBranch.Address.Province = branchRequest.Address.Province;
-                existingBranch.Address.Country = branchRequest.Address.Country;
+                if (existingBranch.Address == null)
+                {
+                    existingBranch.Address = new Address();
+                }
+                
+                if (!string.IsNullOrWhiteSpace(branchRequest.Address.Street))
+                {
+                    existingBranch.Address.Street = branchRequest.Address.Street.Trim();
+                }
+                if (!string.IsNullOrWhiteSpace(branchRequest.Address.City))
+                {
+                    existingBranch.Address.City = branchRequest.Address.City.Trim();
+                }
+                if (!string.IsNullOrWhiteSpace(branchRequest.Address.Country))
+                {
+                    existingBranch.Address.Country = branchRequest.Address.Country.Trim();
+                }
+                // Convert empty strings to null for nullable fields
+                existingBranch.Address.District = string.IsNullOrWhiteSpace(branchRequest.Address.District) 
+                    ? null 
+                    : branchRequest.Address.District.Trim();
+                existingBranch.Address.Province = string.IsNullOrWhiteSpace(branchRequest.Address.Province) 
+                    ? null 
+                    : branchRequest.Address.Province.Trim();
             }
 
             var updatedBranch = await _branchRepository.UpdateBranch(existingBranch);

@@ -25,10 +25,7 @@ namespace GYMFeeManagement_System_BE.Repositories
         public async Task<ICollection<EnrollProgram>> GetAllEnrollPrograms()
         {
             var enrollProgramList = await _dbContext.EnrollPrograms.ToListAsync();
-            if (enrollProgramList.Count == 0)
-            {
-                throw new Exception("EnrollPrograms not Found");
-            }
+            // Return empty list instead of throwing exception when no enroll programs found
             return enrollProgramList;
         }
   /*      public async Task<PaginatedResponse<EnrollProgram>> GetAllEnrollPrograms(int pageNumber, int pageSize)

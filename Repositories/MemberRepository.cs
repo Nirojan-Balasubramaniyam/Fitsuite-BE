@@ -129,12 +129,23 @@ namespace GYMFeeManagement_System_BE.Repositories
             // Get the total record count after applying the filter
             var totalRecords = await query.CountAsync();
 
+            // Return empty list instead of throwing exception when no members found
             if (totalRecords == 0)
             {
-                throw new Exception("No members found matching the criteria");
+                return new PaginatedResponse<Member>
+                {
+                    TotalRecords = 0,
+                    PageNumber = pageNumber > 0 ? pageNumber : 1,
+                    PageSize = pageSize > 0 ? pageSize : 10,
+                    Data = new List<Member>()
+                };
             }
 
-            // If both pageNumber and pageSize are 0, fetch all members
+            // Set default values if inputs are invalid
+            pageNumber = pageNumber <= 0 ? 1 : pageNumber;
+            pageSize = pageSize <= 0 ? 10 : pageSize;
+
+            // If both pageNumber and pageSize are 0 (after validation, this won't happen, but keeping for safety)
             if (pageNumber == 0 && pageSize == 0)
             {
                 var allMembers = await query.ToListAsync();

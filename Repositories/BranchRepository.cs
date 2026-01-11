@@ -38,9 +38,17 @@ namespace GYMFeeManagement_System_BE.Repositories
             pageSize = pageSize <= 0 ? 10 : pageSize;
 
             var totalRecords = await _dbContext.Branches.CountAsync(); // Total records for pagination
+            
+            // Return empty list instead of throwing exception when no branches found
             if (totalRecords == 0)
             {
-                throw new Exception("Branchs not Found");
+                return new PaginatedResponse<Branch>
+                {
+                    TotalRecords = 0,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Data = new List<Branch>()
+                };
             }
 
             var branchList = await _dbContext.Branches
