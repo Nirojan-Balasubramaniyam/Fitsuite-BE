@@ -606,6 +606,12 @@ namespace GYMFeeManagement_System_BE.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WorkoutPlanId"));
 
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MemberId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -616,10 +622,18 @@ namespace GYMFeeManagement_System_BE.Migrations
                     b.Property<int>("StaffId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("StartTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<float>("Weight")
                         .HasColumnType("real");
 
+                    b.Property<bool>("isDone")
+                        .HasColumnType("bit");
+
                     b.HasKey("WorkoutPlanId");
+
+                    b.HasIndex("MemberId");
 
                     b.HasIndex("StaffId");
 
@@ -780,7 +794,7 @@ namespace GYMFeeManagement_System_BE.Migrations
                         .HasForeignKey("StaffId");
 
                     b.HasOne("GYMFeeManagement_System_BE.Entities.WorkoutPlan", "WorkoutPlan")
-                        .WithMany("WorkoutEnrollments")
+                        .WithMany()
                         .HasForeignKey("WorkoutPlanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -792,11 +806,19 @@ namespace GYMFeeManagement_System_BE.Migrations
 
             modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.WorkoutPlan", b =>
                 {
+                    b.HasOne("GYMFeeManagement_System_BE.Entities.Member", "Member")
+                        .WithMany("WorkoutPlans")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GYMFeeManagement_System_BE.Entities.Staff", "Staff")
                         .WithMany("WorkoutPlans")
                         .HasForeignKey("StaffId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Member");
 
                     b.Navigation("Staff");
                 });
@@ -825,6 +847,8 @@ namespace GYMFeeManagement_System_BE.Migrations
                     b.Navigation("Reviews");
 
                     b.Navigation("WorkoutEnrollments");
+
+                    b.Navigation("WorkoutPlans");
                 });
 
             modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.ProgramType", b =>
@@ -855,11 +879,6 @@ namespace GYMFeeManagement_System_BE.Migrations
                     b.Navigation("EnrollPrograms");
 
                     b.Navigation("Requests");
-                });
-
-            modelBuilder.Entity("GYMFeeManagement_System_BE.Entities.WorkoutPlan", b =>
-                {
-                    b.Navigation("WorkoutEnrollments");
                 });
 #pragma warning restore 612, 618
         }

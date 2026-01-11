@@ -1,5 +1,6 @@
 ﻿using GYMFeeManagement_System_BE.Database;
 using GYMFeeManagement_System_BE.DTOs.Response;
+using GYMFeeManagement_System_BE.DTOs.Response.RequestResponseDTOs;
 using GYMFeeManagement_System_BE.Entities;
 using GYMFeeManagement_System_BE.IRepositories;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,7 @@ namespace GYMFeeManagement_System_BE.Repositories
             // Return empty list instead of throwing exception when no workout plans found
             return workoutPlanList;
         }
+
         public async Task<PaginatedResponse<WorkoutPlan>> GetAllWorkoutPlans(int pageNumber, int pageSize)
         {
             // Set default values if inputs are invalid
@@ -72,12 +74,28 @@ namespace GYMFeeManagement_System_BE.Repositories
             return workoutPlan;
         }
 
+
+        public async Task<ICollection<WorkoutPlan>> GetWorkoutPlanIsDoneByMenberId(int MemberId)
+        {
+            var workoutPlan = await _dbContext.WorkoutPlans.Where(w => w.MemberId == MemberId && w.isDone == true).ToListAsync();
+            if (workoutPlan == null) throw new Exception("WorkoutPlan Not Found");
+            return workoutPlan;
+        }
+
+        public async Task<ICollection<WorkoutPlan>> GetWorkoutPlanByMenberId(int MemberId)
+        {
+            var workoutPlan = await _dbContext.WorkoutPlans.Where(w => w.MemberId == MemberId).ToListAsync();
+            if (workoutPlan == null) throw new Exception("WorkoutPlan Not Found");
+            return workoutPlan;
+        }
+
+
         public async Task<WorkoutPlan> GetWorkoutPlanByName(string workoutName)
         {
             var workoutPlan = await _dbContext.WorkoutPlans.SingleOrDefaultAsync(w => w.Name == workoutName);
-
             return workoutPlan;
         }
+
 
         public async Task<WorkoutPlan> UpdateWorkoutPlan(WorkoutPlan updateWorkoutPlan)
         {
@@ -99,7 +117,27 @@ namespace GYMFeeManagement_System_BE.Repositories
                 _dbContext.WorkoutPlans.Remove(workoutPlan);
                 await _dbContext.SaveChangesAsync();
             }
-
         }
+
+
+        public async Task<ICollection<UniqueMembers>> GetAllUniqueMembers()
+        {
+            var members = await _dbContext.WorkoutPlans
+                    .Include(wp => wp.Member)
+                    .Where(wp => wp.Member != null) 
+                    .Select(wp => new UniqueMembers
+                    {
+                        Id = wp.MemberId,
+                        Name = wp.Member.FirstName + wp.Member.LastName,
+                        Email = wp.Member.Email
+                    })
+                    .Distinct()
+                    .ToListAsync();
+
+            return members;
+        }
+
+
+
     }
 }
